@@ -1,8 +1,8 @@
 from datetime import datetime
-from info import local
-from tools import (LocalValidationError, ValidDataBadResponse, )
-from nother import dv, dcall, SurpriseArgs
+from apix.dyno import (dynamic_validator, dynamic_call, SurpriseArgs)
+from apix.tools import (LocalValidationError, ValidDataBadResponse, )
 
+from info import local
 
 class Foo(LocalValidationError): pass
 
@@ -78,21 +78,21 @@ class config:
     validate = local_validate
 
 
-_validator = dv(config)
-call = dcall(config)
+_validator = dynamic_validator(config)
+call = dynamic_call(config)
 
 
 # test
 # ############################################################################
-from pprint import pprint
 from collections import defaultdict
-from tools import ( raw_swagger, )
-import nother
-from nother import NonDictArgs
-from test_data_petstore import test_parameters 
 import json
 import jsonref
 import jsonschema
+
+from apix.tools import ( raw_swagger, )
+from apix.dyno import NonDictArgs
+
+from test_data_petstore import test_parameters 
 
 
 # TODO: clarify messaging.

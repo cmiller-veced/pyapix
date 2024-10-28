@@ -1,8 +1,10 @@
 from functools import lru_cache
 from collections import defaultdict
-from tools import ( raw_swagger, )
-import nother
-from nother import NonDictArgs
+
+from apix.tools import ( raw_swagger, )
+from apix import dyno
+from apix.dyno import NonDictArgs
+
 from test_data_nws import test_parameters
 from api_nws import call, _validator, altered_raw_swagger
 from info import local

@@ -1,8 +1,9 @@
 from datetime import datetime
-from info import local
-from tools import ( LocalValidationError,)
-from nother import (dv, dcall,)
 
+from apix.tools import ( LocalValidationError,)
+from apix.dyno import (dynamic_validator, dynamic_call,)
+
+from info import local
 
 class DateOrderError(LocalValidationError): pass
 
@@ -42,19 +43,21 @@ class config:
     validate = local_validate
 
 
-_validator = dv(config)
-call = dcall(config)
+_validator = dynamic_validator(config)
+call = dynamic_call(config)
 
 
 # test
 # ############################################################################
-from pprint import pprint
 from collections import defaultdict
-from tools import ( raw_swagger, )
+
 import json
 import jsonref
-import nother
-from nother import NonDictArgs
+
+from apix import dyno
+from apix.dyno import NonDictArgs
+from apix.tools import ( raw_swagger, )
+
 from test_data_obis import test_parameters
 
 

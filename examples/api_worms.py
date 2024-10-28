@@ -1,5 +1,6 @@
+from apix.dyno import (dynamic_validator, dynamic_call,)
+
 from info import local
-from nother import (dv, dcall,)
 
 
 class config:
@@ -10,20 +11,21 @@ class config:
     validate = lambda params: None
 
 
-_validator = dv(config)
-call = dcall(config)
+_validator = dynamic_validator(config)
+call = dynamic_call(config)
 
 # MVA.  Minimum Viable API
 
 # test
 # ############################################################################
-from pprint import pprint
 from collections import defaultdict
-from tools import ( raw_swagger, )
 import json
 import jsonref
-import nother
-from nother import (NonDictArgs, ValidDataBadResponse,)
+
+from apix.tools import ( raw_swagger, )
+from apix import dyno
+from apix.dyno import (NonDictArgs, ValidDataBadResponse,)
+
 from test_data_worms import test_parameters
 
 

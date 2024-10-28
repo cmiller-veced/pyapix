@@ -1,5 +1,6 @@
+from apix.dyno import (dynamic_validator, dynamic_call,)
+
 from info import local
-from nother import dv, dcall
 
 
 class config:
@@ -10,20 +11,20 @@ class config:
     validate = lambda params: None
 
 
-_validator = dv(config)
-call = dcall(config)
+_validator = dynamic_validator(config)
+call = dynamic_call(config)
 
 
 # test
 # ############################################################################
-from pprint import pprint
 from collections import defaultdict
 import json
 import jsonref     # cross platform
 from jsonschema import (validate, FormatChecker,)
-from tools import (raw_swagger, ValidDataBadResponse)
-import nother
-from nother import NonDictArgs
+
+from apix.tools import (raw_swagger, ValidDataBadResponse)
+from apix.dyno import NonDictArgs
+
 from test_data_libre import test_parameters
 
 

@@ -1,6 +1,7 @@
+from apix.tools import (raw_swagger, LocalValidationError,)
+from apix.dyno import (dynamic_validator, dynamic_call,)
+
 from info import local
-from tools import (raw_swagger, LocalValidationError,)
-from nother import (dv, dcall,)
 
 class ValidDataBadResponse(LocalValidationError): pass
 
@@ -35,15 +36,15 @@ class config:
     validate = local_validate
 
 
-_validator = dv(config)
-call = dcall(config)
+_validator = dynamic_validator(config)
+call = dynamic_call(config)
 
 
 # test test test test test test test test test test test test test test test
 ##############################################################################
-from test_data_protein import test_parameters
-from pprint import pprint
 from collections import defaultdict
+
+from test_data_protein import test_parameters
 
 
 # TODO: clarify messaging.

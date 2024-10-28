@@ -1,9 +1,10 @@
 from datetime import datetime
 
-from info import local
-from tools import LocalValidationError
-from nother import dv, dcall
+from apix.tools import LocalValidationError
+from apix.dyno import dynamic_validator, dynamic_call
 # TODO: change some of the `other` names.
+
+from info import local
 
 
 class DateOrderError(LocalValidationError): pass
@@ -53,6 +54,6 @@ class config:
     validate = local_validate
 
 
-_validator = dv(config)
-call = dcall(config)
+_validator = dynamic_validator(config)
+call = dynamic_call(config)
 
