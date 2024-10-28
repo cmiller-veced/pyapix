@@ -1,7 +1,6 @@
 import time
 import json
 import os
-from types import SimpleNamespace
 
 import yaml
 import httpx

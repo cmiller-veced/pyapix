@@ -3,7 +3,7 @@ import jsonref
 from jsonschema import FormatChecker
 import httpx
 
-from tools import (dvalidator, raw_swagger, identity_func,
+from . tools import (dvalidator, raw_swagger, identity_func,
                    extract_from_dict_list,
                    retry_call,
                    LocalValidationError,
@@ -95,7 +95,7 @@ def test_parameters_to_schema():
 
 
 
-def dv(config):
+def dynamic_validator(config):
     swagger_path = config.swagger_path
     local_validate = config.validate
     altered_raw_swagger = config.alt_swagger
@@ -177,7 +177,7 @@ def prep_func(api_base,
 # Because those should be caught by validation...
 
 
-def dcall(config):
+def dynamic_call(config):
     """
     """
     api_base = config.api_base
