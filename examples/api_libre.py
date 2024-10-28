@@ -1,5 +1,20 @@
+# Copyright (c) 2024-2025 Cary Miller
+#
+# Permission to use, copy, modify, and/or distribute this software for any purpose
+# with or without fee is hereby granted, provided that the above copyright notice
+# and this permission notice appear in all copies.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+# REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+# FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+# INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+# TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+# THIS SOFTWARE.
+
+from apix.dyno import (dynamic_validator, dynamic_call,)
+
 from info import local
-from nother import dv, dcall
 
 
 class config:
@@ -10,28 +25,27 @@ class config:
     validate = lambda params: None
 
 
-_validator = dv(config)
-call = dcall(config)
+_validator = dynamic_validator(config)
+call = dynamic_call(config)
 
 
 # test
 # ############################################################################
-from pprint import pprint
 from collections import defaultdict
 import json
 import jsonref     # cross platform
 from jsonschema import (validate, FormatChecker,)
-from tools import (raw_swagger, ValidDataBadResponse)
-import nother
-from nother import NonDictArgs
-from test_data_libre import test_parameters
+
+from apix.tools import (parsed_file_or_url, ValidDataBadResponse)
+from apix.dyno import NonDictArgs
+from test_data.libre import test_parameters
 
 
-def _validate_and_call():
+def test_validate_and_call():
   try:
     bad_param_but_ok = defaultdict(list)
     good_param_not_ok = defaultdict(list)
-    jdoc = raw_swagger(config.swagger_path)
+    jdoc = parsed_file_or_url(config.swagger_path)
     jdoc = jsonref.loads(json.dumps(jdoc))
     paths = config.alt_swagger(jdoc)['paths']
     for endpoint in paths:
@@ -74,8 +88,7 @@ def _validate_and_call():
     globals().update(locals())
 
 
-if __name__ == '__main__': 
-    _validate_and_call()
+#if __name__ == '__main__': _validate_and_call()
 
 
 # head = {'accept': 'application/json'}  # 
@@ -85,7 +98,7 @@ if __name__ == '__main__':
 # 
 # def validate_and_call():
 #   try:
-#     rs = raw_swagger(api_file_path)       # 
+#     rs = parsed_file_or_url(api_file_path)       # 
 #     with httpx.Client(base_url=api_base) as client:   # 
 #         verb_map = dict(get=client.get, post=client.post)
 #         for ep in rs['paths']:
@@ -150,7 +163,7 @@ if __name__ == '__main__':
 #   try:
 #     """Return a function to validata parameters for `endpoint`.
 #     """
-#     rs = raw_swagger(openapi_file)     # protein vs nws vs libre
+#     rs = parsed_file_or_url(openapi_file)     # protein vs nws vs libre
 #     with_refs = jsonref.loads(json.dumps(rs))
 #     thing = with_refs['paths'][endpoint]
 #     assert len(thing.keys()) == 1

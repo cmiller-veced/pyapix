@@ -1,39 +1,35 @@
-from info import local
-from nother import (dv, dcall,)
+# Copyright (c) 2024-2025 Cary Miller
+#
+# Permission to use, copy, modify, and/or distribute this software for any purpose
+# with or without fee is hereby granted, provided that the above copyright notice
+# and this permission notice appear in all copies.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+# REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+# FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+# INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+# TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+# THIS SOFTWARE.
 
-
-class config:
-    swagger_path = local.swagger.worms
-    api_base = local.api_base.worms
-    alt_swagger = lambda x: x 
-    head_func = lambda endpoint, verb: {}
-    validate = lambda params: None
-
-
-_validator = dv(config)
-call = dcall(config)
-
-# MVA.  Minimum Viable API
-
-# test
-# ############################################################################
-from pprint import pprint
 from collections import defaultdict
-from tools import ( raw_swagger, )
+
 import json
 import jsonref
-import nother
-from nother import (NonDictArgs, ValidDataBadResponse,)
-from test_data_worms import test_parameters
+
+from apis.tools import parsed_file_or_url
+from apis.api_tools import NonDictArgs
+from apis.obis import _validator, call, config, altered_raw_swagger
+from test_data.obis import test_parameters
 
 
-def validate_and_call():
+def test_validate_and_call():
   try:
     bad_param_but_ok = defaultdict(list)
     good_param_not_ok = defaultdict(list)
-    jdoc = raw_swagger(config.swagger_path)  # TODO: pass flag for deref vs not.?
+    jdoc = parsed_file_or_url(config.swagger_path)  # TODO: pass flag for deref vs not.?
     jdoc = jsonref.loads(json.dumps(jdoc))
-    paths = config.alt_swagger(jdoc)['paths']
+    paths = altered_raw_swagger(jdoc)['paths']
     for endpoint in paths:
         for verb in paths[endpoint]:
             print(endpoint, verb)
@@ -46,7 +42,6 @@ def validate_and_call():
 
                     print('   ok good valid', params)
                     response = call(endpoint, verb, params)
-                    gr = response
                     if not response.is_success:
                         good_param_not_ok[(endpoint, verb)].append(params)
                         raise ValidDataBadResponse(params)
@@ -57,8 +52,9 @@ def validate_and_call():
                     print('   ok bad NOT valid', params)
                     try:
                         response = call(endpoint, verb, params)
-                    except NonDictArgs:
-                        break
+                    except (NonDictArgs, KeyError):
+                        continue
+#                        break
                     if response.is_success:
                         bad_param_but_ok[(endpoint, verb)].append(params)
   finally:
@@ -67,5 +63,3 @@ def validate_and_call():
     globals().update(locals())
 
 
-if __name__ == '__main__':
-    validate_and_call()

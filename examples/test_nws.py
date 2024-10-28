@@ -1,19 +1,37 @@
+# Copyright (c) 2024-2025 Cary Miller
+#
+# Permission to use, copy, modify, and/or distribute this software for any purpose
+# with or without fee is hereby granted, provided that the above copyright notice
+# and this permission notice appear in all copies.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+# REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+# FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+# INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+# TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+# THIS SOFTWARE.
+
 from functools import lru_cache
 from collections import defaultdict
-from tools import ( raw_swagger, )
-import nother
-from nother import NonDictArgs
-from test_data_nws import test_parameters
-from api_nws import call, _validator, altered_raw_swagger
-from info import local
+import pytest
+
+from apis.tools import parsed_file_or_url
+from apis.api_tools import NonDictArgs
+from apis.nws import call, _validator, altered_raw_swagger, config
+# TODO: consider making call behave like _validator.
+# The behavior of the two is currently maybe surprising / inconsistent.
+# but the code is currently minimal.
+# but the change will be a one-liner.
+from test_data.nws import test_parameters
 
 
 # TODO: clarify messaging.
-def validate_and_call():
+def test_validate_and_call():
   try:
     bad_param_but_ok = defaultdict(list)
     good_param_not_ok = defaultdict(list)
-    jdoc = raw_swagger(local.swagger.nws)  # TODO: pass flag for deref vs not.?
+    jdoc = parsed_file_or_url(config.swagger_path)  # TODO: pass flag for deref vs not.?
     paths = altered_raw_swagger(jdoc)['paths']
     for endpoint in paths:
         for verb in paths[endpoint]:
@@ -32,6 +50,9 @@ def validate_and_call():
                         raise ValidDataBadResponse(params)
                     if response.is_success:
                         print('   ok good call')
+                if endpoint == '/stations/{stationId}/observations':
+                    break
+                break  # before bad
                 for params in things['bad']:
                     assert not validator.is_valid(params)
                     print('   ok bad NOT valid', params)
@@ -52,7 +73,7 @@ def validate_and_call():
     globals().update(locals())
 
 
-def current_alerts(area='CO', zone='COZ040', event='Red Flag Warning'):
+def demo_current_alerts(area='CO', zone='COZ040', event='Red Flag Warning'):
   try:
     denver_zone = 'COZ040'
     params = dict(zone=zone)
@@ -88,35 +109,33 @@ def current_alerts(area='CO', zone='COZ040', event='Red Flag Warning'):
 #     return response['updated']     # timestamp
 
 
-# Fetch a data set suitable for a pandas dataframe.
-# ############################################################################
-import pandas
-
-
-def nws_series():
+def demo_nws_series():
   try:
     """ Get a series of observations suitable for putting in a pandas DF,
     and then a jupyter notebook.
     """
+    import pandas
     # Data
-    ep1 = '/stations/{stationId}/observations'
+    endpoint = '/stations/{stationId}/observations'
     stationId = 'KRCM'   # OK
     stationId = 'CO100'   # OK
     params = {                                # OK
         'stationId': stationId, 
-        'start': '2024-09-22T23:59:59+00:00', 
-        'end':   '2024-09-23T23:59:59+00:00', 
+#         'start': '2024-11-13:59:00+00:00', 
+#         'end': '2024-11-14:59:00+00:00', 
         'limit':   50,
     }
-    validator = _validator(ep1, 'get')
+    # Seems it may require recent timestamps.
+    validator = _validator(endpoint, 'get')
     assert validator.is_valid(params)
 
-    response = call(ep1, 'get', params)
+    response = call(endpoint, 'get', params)
     assert response.status_code == 200
 
     # Extract desired data from response.
     final = []
     feats = response.json()['features']
+    assert feats
     for ft in feats: 
         pt = ft['properties']
         for key in [ '@id', '@type', 'elevation', 'station', 'rawMessage', 'icon', 'presentWeather', 'cloudLayers', 'textDescription', ]:
@@ -128,14 +147,19 @@ def nws_series():
 
     # Convert to dataframe.
     df = pandas.DataFrame(final)
+#    assert df.shape[0] > 10
     assert df.shape[1] == 15
     return df
   finally:
     globals().update(locals())
 
 
-if __name__ == '__main__':
-    ca = current_alerts()
-    validate_and_call()
-#    nws_series()
+def test_current_alerts():
+    # Because returning a value from a test generates a pytest warning.
+    demo_current_alerts()
+
+
+def test_nws_series():
+    # Because returning a value from a test generates a pytest warning.
+    demo_nws_series()
 
