@@ -75,7 +75,7 @@ lines.  Bigger APIs benefit more from this approach.  This approach eliminates
 the manual effort of object definitions required by a DAO-based approach while
 more accurately representing the contents of the OpenAPI file.  It also
 eliminates the need for manual documentation by leveraging the work
-already done by the OpenAPI author.
+already done by the OpenAPI author.  https://www.marinespecies.org/rest/
 
 
 
