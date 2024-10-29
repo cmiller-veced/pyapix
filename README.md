@@ -1,6 +1,4 @@
 ---
-[apis]: https://github.com/cmiller-veced/pyapix/tree/main/apis
-[examples]: https://github.com/cmiller-veced/pyapix/tree/main/examples
 
 ---
 # readme
@@ -82,9 +80,42 @@ more accurately representing the contents of the OpenAPI file.  It also
 eliminates the need for manual documentation by leveraging work
 already done by the OpenAPI author.  https://www.marinespecies.org/rest/
 
-See the [apis] directory for more client definitions and the [examples]
-directory for usage examples.
+See the [apis](apis) directory for more client definitions and the
+[examples](examples) directory for usage examples.
 
+[apis]: https://github.com/cmiller-veced/pyapix/tree/main/apis
+[examples]: https://github.com/cmiller-veced/pyapix/tree/main/examples
+[Contribution guidelines for this project](docs/CONTRIBUTING.md)
+
+---
+# readme
+
+A tool for quickly creating high quality API clients (SDKs).  Initial target APIs are
+those defined in Swagger/OpenAPI.
+
+# How to use it
+
+If you are familiar with the SwaggerDoc for an API or a Postman collection, the
+client will look familiar.  Many of your intuitions from SwaggerDoc or Postman
+will help you in working with the client.
+
+    # WoRMS: World Register of Marine Species
+    from apis.worms import _validator, call
+
+    (endpoint, verb) = '/AphiaClassificationByAphiaID/{ID}', 'get'
+    validator = _validator(endpoint, verb)
+    parameters = {'ID': 127160 }
+    assert validator.is_valid(parameters)
+    response = call(endpoint, verb, parameters)
+    assert response.status_code == 200
+
+
+    (endpoint, verb) = '/AphiaRecordsByName/{ScientificName}', 'get'
+    validator = _validator(endpoint, verb)
+    parameters = {'ScientificName': 'Solea solea' }
+    assert validator.is_valid(parameters)
+    response = call(endpoint, verb, parameters)
+    rj = response.json()[0]
 
 ### You
 
