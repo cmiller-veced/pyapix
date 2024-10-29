@@ -1,4 +1,4 @@
-# readme
+# pyapiX
 
 A tool for quickly creating high quality API clients (SDKs).  Initial target APIs are
 those defined in Swagger/OpenAPI.
