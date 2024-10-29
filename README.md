@@ -10,23 +10,15 @@ If you are familiar with the SwaggerDoc for an API or a Postman collection, the
 client will look familiar.  Many of your intuitions from SwaggerDoc or Postman
 will help you in working with the client.
 
-    def namespacify(thing):
-        from types import SimpleNamespace
-        ugly_hack = json.dumps(thing, indent=1)
-        return json.loads(ugly_hack, object_hook=lambda d: SimpleNamespace(**d))
-
     # WoRMS: World Register of Marine Species
+    from apis.worms import _validator, call
 
     (endpoint, verb) = '/AphiaClassificationByAphiaID/{ID}', 'get'
     validator = _validator(endpoint, verb)
     parameters = {'ID': 127160 }
     assert validator.is_valid(parameters)
     response = call(endpoint, verb, parameters)
-    rn = namespacify(response.json())
-
-    assert rn.child.child.child.child.child.child.child.child.child.child.child.child.scientificname == 'Solea solea'
-    assert rn.child.child.child.child.child.child.child.child.child.child.child.child.AphiaID == 127160
-
+    assert response.status_code == 200
 
 
     (endpoint, verb) = '/AphiaRecordsByName/{ScientificName}', 'get'
@@ -57,6 +49,36 @@ will help you in working with the client.
 
     On instance:
         {'foo': 'Solea solea'}
+
+
+# API Definition
+
+The API definition for the above...
+
+    # WoRMS: World Register of Marine Species
+
+    from apis.api_tools import dynamic_validator, dynamic_call
+
+    from info import local
+
+
+    class config:
+        swagger_path = local.swagger.worms
+        api_base = local.api_base.worms
+        alt_swagger = lambda x: x 
+        head_func = lambda endpoint, verb: {}
+        validate = lambda params: None
+
+
+    _validator = dynamic_validator(config)
+    call = dynamic_call(config)
+
+The API definition is 17 lines.  Most APIs require more but never over 100
+lines.  Bigger APIs benefit more from this approach.  This approach eliminates
+the manual effort of object definitions required by a DAO-based approach while
+more accurately representing the contents of the OpenAPI file.  It also
+eliminates the need for manual documentation by leveraging the work
+already done by the OpenAPI author.
 
 
 
