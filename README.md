@@ -5,7 +5,6 @@ those defined in Swagger/OpenAPI.
 
 # How to use it
 
-Show how.  Right here.
 If you are familiar with the SwaggerDoc for an API or a Postman collection, the
 client will look familiar.  Many of your intuitions from SwaggerDoc or Postman
 will help you in working with the client.
