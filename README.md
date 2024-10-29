@@ -1,3 +1,8 @@
+---
+[apis]: https://github.com/cmiller-veced/pyapix/tree/main/apis
+[examples]: https://github.com/cmiller-veced/pyapix/tree/main/examples
+
+---
 # readme
 
 A tool for quickly creating high quality API clients (SDKs).  Initial target APIs are
@@ -76,6 +81,9 @@ the manual effort of object definitions required by a DAO-based approach while
 more accurately representing the contents of the OpenAPI file.  It also
 eliminates the need for manual documentation by leveraging work
 already done by the OpenAPI author.  https://www.marinespecies.org/rest/
+
+See the [apis] directory for more client definitions and the [examples]
+directory for usage examples.
 
 
 ### You
