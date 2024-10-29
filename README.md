@@ -48,9 +48,7 @@ will help you in working with the client.
         {'foo': 'Solea solea'}
 
 
-# API Definition
-
-The API definition for the above...
+# API Definition for the above...
 
     # WoRMS: World Register of Marine Species
 
