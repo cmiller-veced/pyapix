@@ -48,7 +48,7 @@ will help you in working with the client.
         {'foo': 'Solea solea'}
 
 
-# API Definition for the above...
+# API Definition for the above
 
     # WoRMS: World Register of Marine Species
 
@@ -66,8 +66,8 @@ will help you in working with the client.
     _validator = dynamic_validator(config)
     call = dynamic_call(config)
 
-The API definition is about 15 lines.  Most APIs require more but never over 100
-lines.  Bigger APIs benefit more from this approach.  This approach eliminates
+The client definition is about 15 lines.  Most APIs require more but never over 100
+lines.  More complex APIs benefit more from this approach.  This approach eliminates
 the manual effort of object definitions required by a DAO-based approach while
 more accurately representing the contents of the OpenAPI file.  It also
 eliminates the need for manual documentation by leveraging work
