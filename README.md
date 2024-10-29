@@ -58,12 +58,10 @@ The API definition for the above...
 
     from apis.api_tools import dynamic_validator, dynamic_call
 
-    from info import local
-
 
     class config:
-        swagger_path = local.swagger.worms
-        api_base = local.api_base.worms
+        swagger_path = 'https://www.marinespecies.org/rest/api-docs/openapi.yaml'
+        api_base = 'https://www.marinespecies.org/rest'
         alt_swagger = lambda x: x 
         head_func = lambda endpoint, verb: {}
         validate = lambda params: None
@@ -72,7 +70,7 @@ The API definition for the above...
     _validator = dynamic_validator(config)
     call = dynamic_call(config)
 
-The API definition is 17 lines.  Most APIs require more but never over 100
+The API definition is about 15 lines.  Most APIs require more but never over 100
 lines.  Bigger APIs benefit more from this approach.  This approach eliminates
 the manual effort of object definitions required by a DAO-based approach while
 more accurately representing the contents of the OpenAPI file.  It also
