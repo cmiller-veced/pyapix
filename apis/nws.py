@@ -1,8 +1,7 @@
 from datetime import datetime
 
-from apix.tools import LocalValidationError
-from apix.dyno import dynamic_validator, dynamic_call
-# TODO: change some of the `other` names.
+from apis.tools import LocalValidationError
+from apis.api_tools import dynamic_validator, dynamic_call
 
 from info import local
 
@@ -56,4 +55,16 @@ class config:
 
 _validator = dynamic_validator(config)
 call = dynamic_call(config)
+
+
+# vd = _validator(endpoint, verb)
+# vd.is_valid(parameters)
+# vd.validate(parameters)
+# call(endpoint, verb, parameters)
+# The behavior of the two is inconsistent.
+# How about this?
+# caller = dynamic_call(config) ...
+# call = caller(endpoint, verb)
+# response = call(parameters)
+# I guess that would be called a convenience function?
 

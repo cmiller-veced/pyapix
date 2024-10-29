@@ -1,6 +1,7 @@
 from collections import defaultdict
 
-from apis.protein import _validator, call, altered_raw_swagger
+from apis.tools import raw_swagger
+from apis.protein import _validator, call, altered_raw_swagger, config
 
 from test_data_protein import test_parameters
 
@@ -10,7 +11,7 @@ def validate_and_call():
   try:
     bad_param_but_ok = defaultdict(list)
     good_param_not_ok = defaultdict(list)
-    rs = raw_swagger(local.swagger.protein)
+    rs = raw_swagger(config.swagger_path)
     paths = altered_raw_swagger(rs)['paths']
     for endpoint in paths:
         for verb in paths[endpoint]:

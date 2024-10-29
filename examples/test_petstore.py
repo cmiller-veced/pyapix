@@ -4,7 +4,7 @@ import jsonref
 import jsonschema
 
 from apis.tools import raw_swagger
-from apis.api_tools import NonDictArgs
+from apis.api_tools import NonDictArgs, SurpriseArgs
 from apis.petstore import _validator, call, config, altered_raw_swagger
 
 from test_data_petstore import test_parameters 

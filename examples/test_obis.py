@@ -5,6 +5,7 @@ import jsonref
 
 from apis.api_tools import NonDictArgs
 from apis.tools import raw_swagger
+from apis.obis import _validator, call, config, altered_raw_swagger
 
 from test_data_obis import test_parameters
 
@@ -13,7 +14,7 @@ def validate_and_call():
   try:
     bad_param_but_ok = defaultdict(list)
     good_param_not_ok = defaultdict(list)
-    jdoc = raw_swagger(local.swagger.obis)  # TODO: pass flag for deref vs not.?
+    jdoc = raw_swagger(config.swagger_path)  # TODO: pass flag for deref vs not.?
     jdoc = jsonref.loads(json.dumps(jdoc))
     paths = altered_raw_swagger(jdoc)['paths']
     for endpoint in paths:

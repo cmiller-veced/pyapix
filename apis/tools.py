@@ -44,11 +44,53 @@ def retry_call(n=3, tfun=lambda i:i):
 # appears twice and that is absurd.
 
 
-def raw_swagger(at_path):
+class RemoteFileReadException(Exception): pass
+
+
+def raw_remote_file(at_path):
+    heads = {'user-agent': 'python-httpx/0.27.2'}
+    # TODO: header is required by NWS.
+    request = httpx.Request('get', at_path, headers=heads)
+    with httpx.Client() as client:
+        response = client.send(request)  
+    the_doc = response.text
+    if response.status_code != 200:
+        raise RemoteFileReadException(the_doc)
+    return the_doc
+
+
+def raw_local_file(at_path):
     with open(os.path.expanduser(at_path)) as fh:
-        if at_path.endswith('.json'):
-            return json.load(fh)
-        return yaml.safe_load(fh)
+        return fh.read()
+
+
+#def raw_file_or_url(at_path):  pass
+# TODO: name change  DONE
+def parsed_file_or_url(at_path):
+    if at_path.startswith('http'):
+        the_doc = raw_remote_file(at_path)
+    else:
+        the_doc = raw_local_file(at_path)
+    if at_path.endswith('.json'):
+        return json.loads(the_doc)
+    return yaml.safe_load(the_doc)
+
+
+def test_loading():
+    local_file1 = '~/local/nws/openapi.json'
+    remote_file1 = 'https://api.weather.gov/openapi.json'
+    local_file2 = '~/local/worms/openapi.yaml'
+    remote_file2 = 'https://www.marinespecies.org/rest/api-docs/openapi.yaml'
+
+    local1 = parsed_file_or_url(local_file1)
+    remote1 = parsed_file_or_url(remote_file1)
+    local2 = parsed_file_or_url(local_file2)
+    remote2 = parsed_file_or_url(remote_file2)
+    assert local1 == remote1
+    assert list(local2['paths']) == list(remote2['paths'])
+    globals().update(locals())
+
+raw_swagger = parsed_file_or_url    # TODO: something.......
 
 
 def dvalidator(local_validate): 

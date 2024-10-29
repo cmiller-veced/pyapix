@@ -1,12 +1,15 @@
 from functools import lru_cache
 from collections import defaultdict
 
-from apix.tools import ( raw_swagger, )
-from apix import dyno
-from apix.dyno import NonDictArgs
+from apis.tools import raw_swagger   # TODO: rename and extend
+from apis.api_tools import NonDictArgs
+from apis.nws import call, _validator, altered_raw_swagger
+# TODO: consider making call behave like _validator.
+# The behavior of the two is currently maybe surprising / inconsistent.
+# but the code is currently minimal.
+# but the change will be a one-liner.
 
 from test_data_nws import test_parameters
-from api_nws import call, _validator, altered_raw_swagger
 from info import local
 
 
@@ -95,6 +98,7 @@ def current_alerts(area='CO', zone='COZ040', event='Red Flag Warning'):
 import pandas
 
 
+# TODO: why did this stop working !!!!!!!!!! ??????????????
 def nws_series():
   try:
     """ Get a series of observations suitable for putting in a pandas DF,

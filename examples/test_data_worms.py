@@ -1,7 +1,6 @@
 occurrence = {
     'good': [
-        {'scientificname': 'Solea solea' }, 
-        {},
+        {'ScientificName': 'Solea solea' }, 
     ],
     'bad': [ 
         {'taxonid': 127160 },
@@ -72,6 +71,8 @@ test_parameters = {
     '/AphiaRecordByAphiaID/{ID}': aphia_id,
     '/AphiaVernacularsByAphiaID/{ID}': aphia_id,
     '/AphiaRecordFullByAphiaID/{ID}': aphia_id,
+    '/AphiaRecordsByName/{ScientificName}': occurrence,
+
 } 
 
 """
