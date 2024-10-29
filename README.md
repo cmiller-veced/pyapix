@@ -74,18 +74,14 @@ The API definition is about 15 lines.  Most APIs require more but never over 100
 lines.  Bigger APIs benefit more from this approach.  This approach eliminates
 the manual effort of object definitions required by a DAO-based approach while
 more accurately representing the contents of the OpenAPI file.  It also
-eliminates the need for manual documentation by leveraging the work
+eliminates the need for manual documentation by leveraging work
 already done by the OpenAPI author.  https://www.marinespecies.org/rest/
-
 
 
 ### You
 
 You are familiar with the API.  Are comfortable reading the Swagger Doc
 description.  Are comfortable using Postman to access the API.
-
-If you are familiar with either the Swagger Doc or Postman, my code will look
-familiar. 
 The project takes an approach similar to both of the above.  You get access to
-the (endpoint, verb) with the ability to send and recieve data.
+the (endpoint, verb) with the ability to send and receive data.
 
