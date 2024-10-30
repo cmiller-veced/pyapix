@@ -3,18 +3,17 @@ from collections import defaultdict
 import json
 import jsonref
 
+from apis.tools import parsed_file_or_url
 from apis.api_tools import NonDictArgs
-from apis.tools import raw_swagger
 from apis.obis import _validator, call, config, altered_raw_swagger
+from test_data.obis import test_parameters
 
-from test_data_obis import test_parameters
 
-
-def validate_and_call():
+def test_validate_and_call():
   try:
     bad_param_but_ok = defaultdict(list)
     good_param_not_ok = defaultdict(list)
-    jdoc = raw_swagger(config.swagger_path)  # TODO: pass flag for deref vs not.?
+    jdoc = parsed_file_or_url(config.swagger_path)  # TODO: pass flag for deref vs not.?
     jdoc = jsonref.loads(json.dumps(jdoc))
     paths = altered_raw_swagger(jdoc)['paths']
     for endpoint in paths:
@@ -55,5 +54,4 @@ def validate_and_call():
     globals().update(locals())
 
 
-if __name__ == '__main__':
-    validate_and_call()
+#if __name__ == '__main__': validate_and_call()
