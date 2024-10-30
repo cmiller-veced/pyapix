@@ -1,17 +1,16 @@
 from collections import defaultdict
 
-from apis.tools import raw_swagger
+from apis.tools import parsed_file_or_url
 from apis.protein import _validator, call, altered_raw_swagger, config
-
-from test_data_protein import test_parameters
+from test_data.protein import test_parameters
 
 
 # TODO: clarify messaging.
-def validate_and_call():
+def test_validate_and_call():
   try:
     bad_param_but_ok = defaultdict(list)
     good_param_not_ok = defaultdict(list)
-    rs = raw_swagger(config.swagger_path)
+    rs = parsed_file_or_url(config.swagger_path)
     paths = altered_raw_swagger(rs)['paths']
     for endpoint in paths:
         for verb in paths[endpoint]:
@@ -64,8 +63,4 @@ def test_altered_raw_swagger():
     assert jdoc['paths']['/']['get']['parameters'] == []
 
 
-# aside #
-##############################################################################
-
-if __name__ == '__main__':
-    validate_and_call()
+#if __name__ == '__main__': validate_and_call()
