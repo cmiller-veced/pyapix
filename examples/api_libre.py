@@ -24,11 +24,10 @@ from jsonschema import (validate, FormatChecker,)
 
 from apix.tools import (raw_swagger, ValidDataBadResponse)
 from apix.dyno import NonDictArgs
+from test_data.libre import test_parameters
 
-from test_data_libre import test_parameters
 
-
-def _validate_and_call():
+def test_validate_and_call():
   try:
     bad_param_but_ok = defaultdict(list)
     good_param_not_ok = defaultdict(list)
@@ -75,8 +74,7 @@ def _validate_and_call():
     globals().update(locals())
 
 
-if __name__ == '__main__': 
-    _validate_and_call()
+#if __name__ == '__main__': _validate_and_call()
 
 
 # head = {'accept': 'application/json'}  # 
