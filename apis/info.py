@@ -1,12 +1,12 @@
 
 class local:
     class swagger:
-        petstore = 'https://petstore.swagger.io/v2/swagger.json'
-        nws = 'https://api.weather.gov/openapi.json'
+        petstore = '~/local/petstore/swagger.json'
+        nws = '~/local/nws/openapi.json'
         protein = '~/local/ebi/protein_openapi.json'
-        libre = 'https://libretranslate.com/spec'
-        obis = 'https://api.obis.org/obis_v3.yml'
-        worms = 'https://www.marinespecies.org/rest/api-docs/openapi.yaml'
+        libre =  '~/local/libretranslate/openapi.json'
+        obis =  '~/local/obis/obis_v3.yml'
+        worms =  '~/local/worms/openapi.yaml'
     class api_base:
         petstore = 'https://petstore.swagger.io/v2'
         nws = 'https://api.weather.gov'
@@ -24,3 +24,5 @@ class common:
         class accept:
             json = {'Accept': 'application/json'}
 
+# Another EBI API
+# https://www.ebi.ac.uk/interpro/api/static_files/swagger/
