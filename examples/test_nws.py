@@ -1,24 +1,22 @@
 from functools import lru_cache
 from collections import defaultdict
 
-from apis.tools import raw_swagger   # TODO: rename and extend
+from apis.tools import parsed_file_or_url
 from apis.api_tools import NonDictArgs
-from apis.nws import call, _validator, altered_raw_swagger
+from apis.nws import call, _validator, altered_raw_swagger, config
 # TODO: consider making call behave like _validator.
 # The behavior of the two is currently maybe surprising / inconsistent.
 # but the code is currently minimal.
 # but the change will be a one-liner.
-
-from test_data_nws import test_parameters
-from info import local
+from test_data.nws import test_parameters
 
 
 # TODO: clarify messaging.
-def validate_and_call():
+def test_validate_and_call():
   try:
     bad_param_but_ok = defaultdict(list)
     good_param_not_ok = defaultdict(list)
-    jdoc = raw_swagger(local.swagger.nws)  # TODO: pass flag for deref vs not.?
+    jdoc = parsed_file_or_url(config.swagger_path)  # TODO: pass flag for deref vs not.?
     paths = altered_raw_swagger(jdoc)['paths']
     for endpoint in paths:
         for verb in paths[endpoint]:
@@ -57,7 +55,7 @@ def validate_and_call():
     globals().update(locals())
 
 
-def current_alerts(area='CO', zone='COZ040', event='Red Flag Warning'):
+def test_current_alerts(area='CO', zone='COZ040', event='Red Flag Warning'):
   try:
     denver_zone = 'COZ040'
     params = dict(zone=zone)
@@ -93,17 +91,13 @@ def current_alerts(area='CO', zone='COZ040', event='Red Flag Warning'):
 #     return response['updated']     # timestamp
 
 
-# Fetch a data set suitable for a pandas dataframe.
-# ############################################################################
-import pandas
-
-
 # TODO: why did this stop working !!!!!!!!!! ??????????????
-def nws_series():
+def test_nws_series():
   try:
     """ Get a series of observations suitable for putting in a pandas DF,
     and then a jupyter notebook.
     """
+    import pandas
     # Data
     ep1 = '/stations/{stationId}/observations'
     stationId = 'KRCM'   # OK
@@ -138,10 +132,4 @@ def nws_series():
     return df
   finally:
     globals().update(locals())
-
-
-if __name__ == '__main__':
-    ca = current_alerts()
-    validate_and_call()
-#    nws_series()
 
