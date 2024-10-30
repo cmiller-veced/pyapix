@@ -1,8 +1,8 @@
 from datetime import datetime
-from apis.api_tools import (dynamic_validator, dynamic_call, SurpriseArgs)
-from apis.tools import (LocalValidationError, ValidDataBadResponse, )
 
-from info import local
+from .api_tools import (dynamic_validator, dynamic_call, SurpriseArgs)
+from .tools import (LocalValidationError, ValidDataBadResponse, )
+from .info import local
 
 class Foo(LocalValidationError): pass
 

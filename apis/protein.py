@@ -1,7 +1,6 @@
-from apis.tools import (raw_swagger, LocalValidationError,)
-from apis.api_tools import (dynamic_validator, dynamic_call,)
-
-from info import local
+from .tools import (raw_swagger, LocalValidationError,)
+from .api_tools import (dynamic_validator, dynamic_call,)
+from .info import local
 
 class ValidDataBadResponse(LocalValidationError): pass
 

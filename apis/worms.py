@@ -1,8 +1,7 @@
 # WoRMS: World Register of Marine Species
 
-from apis.api_tools import dynamic_validator, dynamic_call
-
-from info import local
+from .api_tools import dynamic_validator, dynamic_call
+from .info import local
 
 
 class config:
