@@ -90,9 +90,14 @@ def test_loading():
     assert list(local2['paths']) == list(remote2['paths'])
     globals().update(locals())
 
+# TODO: deprecate raw_swagger
 raw_swagger = parsed_file_or_url    # TODO: something.......
 
 
+"""
+  /Users/cary/ve/apx/lib/python3.9/site-packages/apis/tools.py:105: DeprecationWarning: Subclassing validator classes is not intended to be part of their public API. A future version will make doing so an error, as the behavior of subclasses isn't guaranteed to stay the same between releases of jsonschema. Instead, prefer composition of validators, wrapping them in an object owned entirely by the downstream library.
+    class D7V(Draft7Validator):
+"""
 def dvalidator(local_validate): 
     def local_is_valid(params):
         try:
@@ -101,6 +106,7 @@ def dvalidator(local_validate):
         except LocalValidationError:
             return False
 
+#    class D7V(Draft7Validator):
     class D7V(Draft7Validator):
         def is_valid(self, thing):
             if not super().is_valid(thing):
@@ -112,4 +118,46 @@ def dvalidator(local_validate):
 
     return D7V
 
+
+def dvalidator(local_validate): 
+    def local_is_valid(params):
+        try:
+            local_validate(params)
+            return True
+        except LocalValidationError:
+            return False
+
+    class D7V:
+        def __init__(self, *pos, **kw):
+            self.v = Draft7Validator(*pos, **kw)
+        def is_valid(self, thing):
+            if not self.v.is_valid(thing):
+                return False
+            return local_is_valid(thing)
+        def validate(self, thing):
+            self.v.validate(thing)
+            return local_validate(thing)
+
+    return D7V
+'''
+Above avoids the DeprecationWarning of the first version.
+This still needs good testing.
+'''
+
+
+# step 1 to refactoring this to eliminate the DeprecationWarning is to have
+# a test.
+# And indeed, the dvalidator is a bit fishy.
+# I should be able to find an equally brief alternative.
+def test_dvalidator(): 
+    class config:
+        swagger_path = local.swagger.worms
+        api_base = local.api_base.worms
+        alt_swagger = lambda x: x 
+        head_func = lambda endpoint, verb: {}
+        validate = lambda params: None
+
+    _validator = dynamic_validator(config)
+    validator = _validator(endpoint, verb)
+    return
 
