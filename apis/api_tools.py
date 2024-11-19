@@ -134,6 +134,6 @@ def prep_func(config):
 
         return (config.api_base + endpoint, verb, request_params)
       finally:
-        globals().update(locals())
+        pass
     return prepped
 

@@ -57,7 +57,7 @@ def param_func(pdict):
 
     return d
   finally:
-    globals().update(locals())
+    pass
 
 
 def altered_raw_swagger(jdoc):
@@ -75,7 +75,8 @@ def altered_raw_swagger(jdoc):
                 foop = parameters
     return jdoc
   finally:
-    globals().update(locals())
+    pass
+
 
 
 def prep_func(config):
@@ -177,7 +178,7 @@ def prep_func(config):
 
         return (config.api_base + endpoint, verb, request_params)
       finally:
-        globals().update(locals())
+        pass
     return prepped
 
 
@@ -216,7 +217,7 @@ def parameters_to_schema(ev_info):
         'type': 'object',     # OK
     }
   finally:
-    globals().update(locals())
+    pass
 
         
 def head_func(endpoint, verb):
