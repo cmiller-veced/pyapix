@@ -8,13 +8,10 @@
 - https://github.com/boto/botocore
 - https://www.paulgraham.com
 - https://d3js.org
-
-d3js is a javascript library that provides a minimal wrapper around SVG.  If you
-understand SVG, d3js will make a lot of sense to you.
-
+  d3js is a javascript library that provides a minimal wrapper around SVG.  If
+  you understand SVG, d3js will make a lot of sense to you.
 - https://aframe.io/docs/1.6.0/introduction/
-
-Aframe is a javascript library around WebGL.
+  Aframe is a javascript library around WebGL.
 
 
 ### APIs with OpenAPI doc  (with client here)
@@ -62,9 +59,8 @@ More advanced than mine in several aspects.
 Excessively complicated in other aspects. 
 Converts openapi description document to Pydantic models.
 
-
 - https://openapi-core.readthedocs.io/en/latest/extensions.html 
-Links to something odd and unreadable.
+    Links to something odd and unreadable.
 
 - https://github.com/wy-z/requests-openapi No validation.
 
@@ -171,8 +167,7 @@ Crap.  Totally non-automatible.
 
 - https://opentelemetry.io/docs/languages/
 
-Walker...
-- https://www.datascienceassn.org/resources
+- https://www.datascienceassn.org/resources Walker
 
 Walker's data science laws...
 http://www.datascienceassn.org/sites/default/files/Walker%27s%20Data%20Science%20Laws%20by%20Michael%20Walker%20-%20Slides.pdf
