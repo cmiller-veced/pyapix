@@ -23,6 +23,8 @@ Aframe is a javascript library around WebGL.
 - https://api.weather.gov/openapi.json NWS   OpenAPI v 3.0
 - https://libretranslate.com/docs/
 - https://www.ebi.ac.uk/proteins/api/openapi.json
+- https://petstore.swagger.io/v2/swagger.json
+
 
 ### APIs with OpenAPI doc  (no client here)
 
@@ -138,35 +140,25 @@ The data analyst will thank us.
   uses optional jsonp, which is antiquated.
 
 
-### etc
-
-- https://geocoding.geo.census.gov/geocoder/Geocoding_Services_API.html
-- https://docs.biothings.io/en/latest/
-- https://github.com/bio-tools/OpenAPI-Importer     competition ??????
-- https://swagger.io/tools/swagger-codegen/  competition.........
-- https://github.com/swagger-api/swagger-codegen  the actual code
-  still compatible w/ Python 2.
-
-
 ### APIs w/o OpenAPI doc found
 
 - https://open-meteo.com  weather    NO swagger file found
 - https://info.arxiv.org/help/api/user-manual.html  no swagger
 - https://newton.vercel.app   no swagger.   symbolic math
+- https://geocoding.geo.census.gov/geocoder/Geocoding_Services_API.html
+
 
 ### etc
+
+- https://docs.biothings.io/en/latest/  for creating APIs
+- https://github.com/bio-tools/OpenAPI-Importer   swagger -> XML via java
+- https://swagger.io/tools/swagger-codegen/  competition $$$
+- https://github.com/swagger-api/swagger-codegen  the actual code
+  still compatible w/ Python 2.
+  Template-driven.
 
 - see Trello API.
 - google:  nws api client       for useful links
-
-
-### swagger petstore
-
-We are currently using the Petstore data from the swagger docs.
-
-- https://petstore.swagger.io/v2/swagger.json
-
-### etc
 
 - https://stackoverflow.com/questions/61112684/how-to-subclass-a-dictionary-so-it-supports-generic-type-hints
   Interesting discussion of subclassing builtins.
@@ -184,11 +176,9 @@ Walker...
 Walker's data science laws...
 http://www.datascienceassn.org/sites/default/files/Walker%27s%20Data%20Science%20Laws%20by%20Michael%20Walker%20-%20Slides.pdf
 
-
 https://cmd2.readthedocs.io/en/0.9.9/alternatives.html
 
 ### Caveat
 
 jsonschema cannot do everything.
-
 
