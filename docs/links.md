@@ -30,21 +30,28 @@ Aframe is a javascript library around WebGL.
 
 #### The competition
 
-A worthy competitor,  on GitHub, PyPi and readthedocs.
+A worthy competitor, but simplistic,  on GitHub, PyPi and readthedocs.
 - https://github.com/WxBDM/nwsapy/blob/master/nwsapy/
 - https://pypi.org/project/nwsapy/
 - https://nwsapy.readthedocs.io/en/latest/index.html
 
-Attempts something similar. 
+Attempts something similar.  Moribund.
 - https://github.com/FKLC/AnyAPI
 
 R package, similar to my thinking
 - https://github.com/jonthegeek/anyapi
 - https://github.com/jonthegeek/beekeeper
 
-
-- https://openapi-core.readthedocs.io/en/latest/extensions.html
+Sophisticated.  More advanced than mine in several aspects.
+Excessively complicated in other aspects.
+Converts openapi description document to Pydantic models.
 - https://github.com/commonism/aiopenapi3
+
+
+Links to something odd and unreadable.
+- https://openapi-core.readthedocs.io/en/latest/extensions.html
+
+No validation.
 - https://github.com/wy-z/requests-openapi
 
 
