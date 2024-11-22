@@ -160,10 +160,10 @@ The data analyst will thank us.
 - https://stackoverflow.com/questions/61112684/how-to-subclass-a-dictionary-so-it-supports-generic-type-hints
   Interesting discussion of subclassing builtins.
 
-Denver Open Data.   I wonder.
 - https://dataportals.org/portal/denver
+    Denver Open Data.   I wonder.
 - https://opendata-geospatialdenver.hub.arcgis.com
-Crap.  Totally non-automatible.
+    Crap.  Totally non-automatible.
 
 - https://opentelemetry.io/docs/languages/
 
