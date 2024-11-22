@@ -24,9 +24,11 @@ Aframe is a javascript library around WebGL.
 - https://developer.osf.io  open science
 - https://apis.guru/api-doc/    List of OpenAPI services
 
-### List of interesting APIs
+### Lists of interesting APIs
 
-- https://any-api.com/
+- https://github.com/APIs-guru/openapi-directory   good
+- https://github.com/public-apis/public-apis       good
+- https://any-api.com/      not very useful
 
 #### The competition
 
@@ -55,7 +57,6 @@ No validation.
 - https://github.com/wy-z/requests-openapi
 
 
-
 ### Our tools
 
 - https://github.com/OAI/OpenAPI-Specification
@@ -66,10 +67,7 @@ No validation.
 - https://json-schema.org
 - https://json-schema.org/understanding-json-schema
 - https://developer.mozilla.org/en-US/docs/Web/API/
-- https://github.com/APIs-guru/openapi-directory
-- https://github.com/public-apis/public-apis
 - python hypothesis for auto-generating data
-
 
 -----------------------------
 
@@ -111,19 +109,27 @@ The data analyst will thank us.
 
 -----------
 
-### Things to watch
+### Things to watch  (single-spaced)
 
 - https://htmx.org  Interactivity w/o javascript
 - https://opensource.fb.com/projects/ Meta Opensource
 - https://jinja.palletsprojects.com/en/3.1.x/templates/
    how to do templates
 
-### Interesting reading
+### Interesting reading  (double-spaced)
 - https://blog.postman.com/what-is-json-schema/
 - https://www.semanticarts.com/data-centric-how-big-things-get-done-in-it/
 - https://www.semanticarts.com/the-data-centric-revolution-best-practices-and-schools-of-ontology-design/
 
 
+### APIs with OpenAPI doc
+
+- https://libretranslate.com/docs/
+- https://www.ebi.ac.uk/proteins/api/openapi.json
+- https://raw.githubusercontent.com/BiGCAT-UM/EnsemblOpenAPI/master/swagger.json
+
+
+### etc
 
 - https://geocoding.geo.census.gov/geocoder/Geocoding_Services_API.html
 - https://docs.biothings.io/en/latest/
@@ -138,21 +144,18 @@ The data analyst will thank us.
 - https://www.biorxiv.org/content/10.1101/170274v1.full.pdf
     has list of biology openAPI services
 - https://github.com/BiGCAT-UM/EnsemblOpenAPI
-- http://www.ebi.ac.uk/proteins/api/swagger.json     NO
-- https://www.ebi.ac.uk/proteins/api/openapi.json    yes
-
-https://raw.githubusercontent.com/BiGCAT-UM/EnsemblOpenAPI/master/swagger.json
-
-- https://libretranslate.com/docs/
 - https://swagger.io/tools/swagger-codegen/  competition.........
 - https://github.com/swagger-api/swagger-codegen  the actual code
   still compatible w/ Python 2.
 
 
-#### APIs w/o swagger found
+### APIs w/o OpenAPI doc found
+
 - https://open-meteo.com  weather    NO swagger file found
 - https://info.arxiv.org/help/api/user-manual.html  no swagger
 - https://newton.vercel.app   no swagger.   symbolic math
+
+### etc
 
 - see Trello API.
 - google:  nws api client       for useful links
