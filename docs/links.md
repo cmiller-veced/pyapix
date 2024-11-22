@@ -19,11 +19,13 @@ Aframe is a javascript library around WebGL.
 
 ### APIs with OpenAPI doc  (with client here)
 
+- https://petstore.swagger.io/v2/swagger.json
 - https://www.weather.gov/documentation/services-web-api
 - https://api.weather.gov/openapi.json NWS   OpenAPI v 3.0
-- https://libretranslate.com/docs/
 - https://www.ebi.ac.uk/proteins/api/openapi.json
-- https://petstore.swagger.io/v2/swagger.json
+- obis
+- worms
+- https://libretranslate.com/docs/
 
 
 ### APIs with OpenAPI doc  (no client here)
@@ -43,29 +45,28 @@ Aframe is a javascript library around WebGL.
 
 #### The competition
 
+- https://github.com/WxBDM/nwsapy/blob/master/nwsapy/ 
 A worthy competitor, but simplistic,  on GitHub, PyPi and readthedocs.
-- https://github.com/WxBDM/nwsapy/blob/master/nwsapy/
 - https://pypi.org/project/nwsapy/
 - https://nwsapy.readthedocs.io/en/latest/index.html
 
+- https://github.com/FKLC/AnyAPI 
 Attempts something similar.  Moribund.
-- https://github.com/FKLC/AnyAPI
 
+- https://github.com/jonthegeek/anyapi 
 R package, similar to my thinking
-- https://github.com/jonthegeek/anyapi
 - https://github.com/jonthegeek/beekeeper
 
-Sophisticated.  More advanced than mine in several aspects.
-Excessively complicated in other aspects.
+- https://github.com/commonism/aiopenapi3 Sophisticated.  
+More advanced than mine in several aspects. 
+Excessively complicated in other aspects. 
 Converts openapi description document to Pydantic models.
-- https://github.com/commonism/aiopenapi3
 
 
+- https://openapi-core.readthedocs.io/en/latest/extensions.html 
 Links to something odd and unreadable.
-- https://openapi-core.readthedocs.io/en/latest/extensions.html
 
-No validation.
-- https://github.com/wy-z/requests-openapi
+- https://github.com/wy-z/requests-openapi No validation.
 
 
 ### Our tools
