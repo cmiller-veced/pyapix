@@ -1,4 +1,4 @@
-# xxxxxxx
+# Interesting Links
 
 
 ### Our motivation
@@ -14,7 +14,7 @@ understand SVG, d3js will make a lot of sense to you.
 
 - https://aframe.io/docs/1.6.0/introduction/
 
-Aframe is a javascript library around (WebGL?).
+Aframe is a javascript library around WebGL.
 
 
 ### APIs with OpenAPI doc
@@ -24,12 +24,9 @@ Aframe is a javascript library around (WebGL?).
 - https://developer.osf.io  open science
 - https://apis.guru/api-doc/    List of OpenAPI services
 
+### List of interesting APIs
 
-#### APIs w/o swagger found
-- https://open-meteo.com  weather    NO swagger file found
-- https://info.arxiv.org/help/api/user-manual.html  no swagger
-- https://newton.vercel.app   no swagger.   symbolic math
-
+- https://any-api.com/
 
 #### The competition
 
@@ -37,14 +34,20 @@ A worthy competitor,  on GitHub, PyPi and readthedocs.
 - https://github.com/WxBDM/nwsapy/blob/master/nwsapy/
 - https://pypi.org/project/nwsapy/
 - https://nwsapy.readthedocs.io/en/latest/index.html
-- https://github.com/FKLC/AnyAPI
-- see Trello API.
-- https://github.com/jonthegeek/anyapi   R package
-- https://github.com/jonthegeek/beekeeper
-    VERY similar to my thinking
 
-- google:  nws api client       for useful links
-- https://any-api.com/   List of interesting APIs
+Attempts something similar. 
+- https://github.com/FKLC/AnyAPI
+
+R package, similar to my thinking
+- https://github.com/jonthegeek/anyapi
+- https://github.com/jonthegeek/beekeeper
+
+
+- https://openapi-core.readthedocs.io/en/latest/extensions.html
+- https://github.com/commonism/aiopenapi3
+- https://github.com/wy-z/requests-openapi
+
+
 
 ### Our tools
 
@@ -92,13 +95,6 @@ compact than code written using the above approach.  Also far more flexible.
 The data analyst will thank us.
 
 
-
-### TODO
-
-- hyperlinks
-- code
-- data source
-
 ### Potential data sources
 
 - https://documents.worldbank.org/en/publication/documents-reports/api
@@ -106,16 +102,7 @@ The data analyst will thank us.
 - https://opensource.fb.com/projects/
 - https://developer.x.com/en/docs/x-api
 
-### swagger petstore
-
-We are currently using the Petstore data from the swagger docs.
-
-- https://petstore.swagger.io/v2/swagger.json
-
-
-
 -----------
-
 
 ### Things to watch
 
@@ -128,17 +115,6 @@ We are currently using the Petstore data from the swagger docs.
 - https://blog.postman.com/what-is-json-schema/
 - https://www.semanticarts.com/data-centric-how-big-things-get-done-in-it/
 - https://www.semanticarts.com/the-data-centric-revolution-best-practices-and-schools-of-ontology-design/
-
-
-### Competition
-- https://openapi-core.readthedocs.io/en/latest/extensions.html
-- https://github.com/commonism/aiopenapi3
-- https://github.com/wy-z/requests-openapi
-
-
-### Caveat
-
-jsonschema cannot do everything.
 
 
 
@@ -166,10 +142,25 @@ https://raw.githubusercontent.com/BiGCAT-UM/EnsemblOpenAPI/master/swagger.json
   still compatible w/ Python 2.
 
 
+#### APIs w/o swagger found
+- https://open-meteo.com  weather    NO swagger file found
+- https://info.arxiv.org/help/api/user-manual.html  no swagger
+- https://newton.vercel.app   no swagger.   symbolic math
+
+- see Trello API.
+- google:  nws api client       for useful links
+
+
+### swagger petstore
+
+We are currently using the Petstore data from the swagger docs.
+
+- https://petstore.swagger.io/v2/swagger.json
+
+### etc
 
 - https://stackoverflow.com/questions/61112684/how-to-subclass-a-dictionary-so-it-supports-generic-type-hints
   Interesting discussion of subclassing builtins.
-
 
 Denver Open Data.   I wonder.
 - https://dataportals.org/portal/denver
@@ -186,4 +177,9 @@ http://www.datascienceassn.org/sites/default/files/Walker%27s%20Data%20Science%2
 
 
 https://cmd2.readthedocs.io/en/0.9.9/alternatives.html
+
+### Caveat
+
+jsonschema cannot do everything.
+
 
