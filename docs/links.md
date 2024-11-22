@@ -17,18 +17,27 @@ understand SVG, d3js will make a lot of sense to you.
 Aframe is a javascript library around WebGL.
 
 
-### APIs with OpenAPI doc
+### APIs with OpenAPI doc  (with client here)
 
 - https://www.weather.gov/documentation/services-web-api
 - https://api.weather.gov/openapi.json NWS   OpenAPI v 3.0
+- https://libretranslate.com/docs/
+- https://www.ebi.ac.uk/proteins/api/openapi.json
+
+### APIs with OpenAPI doc  (no client here)
+
 - https://developer.osf.io  open science
-- https://apis.guru/api-doc/    List of OpenAPI services
+- https://raw.githubusercontent.com/BiGCAT-UM/EnsemblOpenAPI/master/swagger.json
+- https://github.com/BiGCAT-UM/EnsemblOpenAPI
 
 ### Lists of interesting APIs
 
+- https://apis.guru/api-doc/    List of OpenAPI services
 - https://github.com/APIs-guru/openapi-directory   good
-- https://github.com/public-apis/public-apis       good
+- https://github.com/public-apis/public-apis   not limited to OpenAPI
 - https://any-api.com/      not very useful
+- https://www.biorxiv.org/content/10.1101/170274v1.full.pdf
+    has list of biology openAPI services
 
 #### The competition
 
@@ -69,12 +78,9 @@ No validation.
 - https://developer.mozilla.org/en-US/docs/Web/API/
 - python hypothesis for auto-generating data
 
------------------------------
-
 - https://www.postman.com
 - https://pypi.org/project/PyYAML/
 - https://jinja.palletsprojects.com/en/3.1.x/
-
 Jinja does for text strings, something like what d3js does for svg.  A minimal
 way of inserting data into a fixed string.
 
@@ -109,30 +115,21 @@ The data analyst will thank us.
 
 -----------
 
-### Things to watch  (single-spaced)
+### Things to watch
 
 - https://htmx.org  Interactivity w/o javascript
 - https://opensource.fb.com/projects/ Meta Opensource
 - https://jinja.palletsprojects.com/en/3.1.x/templates/
    how to do templates
 
-### Interesting reading  (double-spaced)
+### Interesting reading
+
 - https://blog.postman.com/what-is-json-schema/
 - https://www.semanticarts.com/data-centric-how-big-things-get-done-in-it/
 - https://www.semanticarts.com/the-data-centric-revolution-best-practices-and-schools-of-ontology-design/
 
+----------------
 
-### APIs with OpenAPI doc
-
-- https://libretranslate.com/docs/
-- https://www.ebi.ac.uk/proteins/api/openapi.json
-- https://raw.githubusercontent.com/BiGCAT-UM/EnsemblOpenAPI/master/swagger.json
-
-
-### etc
-
-- https://geocoding.geo.census.gov/geocoder/Geocoding_Services_API.html
-- https://docs.biothings.io/en/latest/
 - https://stackoverflow.com/questions/2067472/what-is-jsonp-and-why-was-it-created
   jsonp == cross-domain requests
   but CORS is better.
@@ -140,10 +137,12 @@ The data analyst will thank us.
   a super simple API.  No swagger.
   uses optional jsonp, which is antiquated.
 
+
+### etc
+
+- https://geocoding.geo.census.gov/geocoder/Geocoding_Services_API.html
+- https://docs.biothings.io/en/latest/
 - https://github.com/bio-tools/OpenAPI-Importer     competition ??????
-- https://www.biorxiv.org/content/10.1101/170274v1.full.pdf
-    has list of biology openAPI services
-- https://github.com/BiGCAT-UM/EnsemblOpenAPI
 - https://swagger.io/tools/swagger-codegen/  competition.........
 - https://github.com/swagger-api/swagger-codegen  the actual code
   still compatible w/ Python 2.
