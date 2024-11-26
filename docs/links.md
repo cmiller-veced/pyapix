@@ -58,6 +58,12 @@ R package, similar to my thinking
 More advanced than mine in several aspects. 
 Excessively complicated in other aspects. 
 Converts openapi description document to Pydantic models.
+- https://github.com/microsoftgraph/msgraph-metadata
+- https://raw.githubusercontent.com/microsoftgraph/msgraph-metadata/refs/heads/master/openapi/v1.0/openapi.yaml
+An enormous yaml file having multiple verbs per endpoint.
+- https://learn.microsoft.com/en-us/graph/overview
+Access to MS365.
+
 
 - https://openapi-core.readthedocs.io/en/latest/extensions.html 
     Links to something odd and unreadable.
@@ -130,11 +136,10 @@ The data analyst will thank us.
 ----------------
 
 - https://stackoverflow.com/questions/2067472/what-is-jsonp-and-why-was-it-created
-  jsonp == cross-domain requests
-  but CORS is better.
+  jsonp == cross-domain requests.  but CORS is better.
 - https://docs.mychem.info/en/latest/doc/chem_annotation_service.html
-  a super simple API.  No swagger.
-  uses optional jsonp, which is antiquated.
+  A super simple API.  No swagger.
+  Uses optional jsonp, which is antiquated.
 
 
 ### APIs w/o OpenAPI doc found
@@ -150,8 +155,8 @@ The data analyst will thank us.
 - https://docs.biothings.io/en/latest/  for creating APIs
 - https://github.com/bio-tools/OpenAPI-Importer   swagger -> XML via java
 - https://swagger.io/tools/swagger-codegen/  competition $$$
-- https://github.com/swagger-api/swagger-codegen  the actual code
-  still compatible w/ Python 2.
+- https://github.com/swagger-api/swagger-codegen  The actual code.
+  Still compatible w/ Python 2.
   Template-driven.
 
 - see Trello API.
