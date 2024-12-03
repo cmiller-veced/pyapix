@@ -288,7 +288,7 @@ One good way to think of it is....
     other_fun('x')
     other_fun('y')
 
-    # Let's see what got logged and where.
+Let's see what got logged and where.
 
     print('='*33)
     print(f'contents of {log_file1}')
