@@ -18,12 +18,12 @@ log_file2 = 'log2.txt'
 
 @log_to(log_file1)
 def some_fun(msg):
-    return msg*2
+    return msg
 
 
 @log_to(log_file2)
 def other_fun(msg):
-    return msg*4
+    return msg*22
 
 
 some_fun('x')
