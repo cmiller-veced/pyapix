@@ -102,6 +102,37 @@ The function can then be called like any other.
 
 
 ## Decorators
+A decorator is a function that takes a function as its sole argument and
+returns a function.
+
+It can be the same function.
+
+    def flagged(fun):
+        fun.flag = True
+        return fun
+
+
+    @flagged
+    def f1():
+        return
+
+    def f2():
+        return
+
+    """
+    >>> f1
+    <function f1 at 0x10415b1f0>
+    >>> f2
+    <function f2 at 0x10415b310>
+    >>> f1.flag
+    True
+    >>> f2.flag
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    AttributeError: 'function' object has no attribute 'flag'
+    """
+
+
 
 ## Parameterized Decorators
 
@@ -152,14 +183,14 @@ Will print something like this...
 
     =================================
     contents of log1.txt
-    some_fun 1732646222, args: ('x',),  kw: {},  value=xx
-    some_fun 1732646222, args: ('y',),  kw: {},  value=yy
+    some_fun 1732646222, args: ('x',),  kw: {},  value=x
+    some_fun 1732646222, args: ('y',),  kw: {},  value=y
 
 
     =================================
     contents of log2.txt
-    other_fun 1732646222, args: ('x',),  kw: {},  value=xxxx
-    other_fun 1732646222, args: ('y',),  kw: {},  value=yyyy
+    other_fun 1732646222, args: ('x',),  kw: {},  value=xxxxxxxxxxxxxxxxxxxxxx
+    other_fun 1732646222, args: ('y',),  kw: {},  value=yyyyyyyyyyyyyyyyyyyyyy
 
 
 
