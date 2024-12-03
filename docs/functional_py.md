@@ -157,7 +157,7 @@ A quick test shows the two decorated functions to be equivalent.
 
 ### Scoping
 
-    Variables of the enclosing function are visible to the inner function.
+Variables of the enclosing function are visible to the inner function.
 
     def logged(fun):
         print(f'{fun} defined')
@@ -258,6 +258,10 @@ One good way to think of it is....
 
 ## Parameterized Decorators
 
+Decorators are closures.  Parameterized decorators use the same concept and add
+another level of nesting.  The next example logs inputs and outputs to a file,
+where the file is specified at function definition time.
+
     import sys
     import time
 
@@ -316,7 +320,7 @@ Will print something like this...
 
 
 
-## Dynamic functions
+## Dynamic functions:  Another use for closures
 
 Dynamic functions are like parameterized decorators but without some of the
 constraints.
