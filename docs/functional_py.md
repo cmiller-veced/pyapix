@@ -119,7 +119,6 @@ It can be the same function.
     def f2():
         return
 
-    """
     >>> f1
     <function f1 at 0x10415b1f0>
     >>> f2
@@ -130,7 +129,130 @@ It can be the same function.
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
     AttributeError: 'function' object has no attribute 'flag'
-    """
+
+More interesting decorators do something with the input or output.  The next example
+alters the output.
+
+
+    def double(fun):
+        def inner(arg):
+            return 2 * fun(arg)
+        return inner
+
+    @double
+    def i2(arg):
+        return arg
+
+The @ syntax is exactly equivalent to 
+
+    def i4(arg):
+        return arg
+    i4 = double(i4)
+
+A quick test shows the two decorated functions to be equivalent.
+
+    assert i2('abc ') == i4('abc ') == 'abc abc '
+    assert i2(2) == i4(2) == 4
+
+
+### Scoping
+
+    Variables of the enclosing function are visible to the inner function.
+
+    def logged(fun):
+        print(f'{fun} defined')
+        def inner(arg):
+            print(f'{fun} run with {arg}')  # Note that `fun` is visible here.
+            return fun(arg)
+        return inner
+
+
+    @logged
+    def f3(arg):
+        return arg
+
+
+    >>> f3('x')
+    <function f3 at 0x10415b0d0> run with x
+    'x'
+    >>> f3(2)
+    <function f3 at 0x10415b0d0> run with 2
+    2
+
+### Memoize
+
+The memoize decorator caches return values, thus saving computation when the
+function is called repeatedly with the same arguments.
+
+
+    def recall(fun):
+        cache = {}
+        def inner(n):
+            if n not in cache:
+                cache[n] = fun(n)
+            return cache[n]
+        return inner
+
+A good use case is for recalling the the value of a recursive function.
+
+    @recall
+    def fact(n):
+        if n == 0:
+            return 1
+        return n * fact(n-1)
+
+    @recall
+    def fib(n):
+        if n == 0 or n == 1:
+            return 1
+        return fib(n-1) + fib(n-2)
+
+Modern versions of Python do not have the same recursion limitations but the
+`recall` decorator remains a good example for when to use a decorator.
+
+The memoize decorator is a good one to practice for understanding scoping but
+the standard lib contains the same.
+
+    from functools import lru_cache
+
+
+    @lru_cache
+    def fact3(n):
+        if n == 0:
+            return 1
+        return n * fact3(n-1)
+
+### Closures
+
+A closure is a function defined inside a function, together with the variables
+of the enclosing function.
+
+    def enclosing():
+        thing = 0
+        def inner():
+            nonlocal thing
+            thing += 1
+            print(f'the value is {thing}')
+        return inner
+
+    c1 = enclosing()    # c1 is a closure
+    c2 = enclosing()    # another closure
+
+    >>> c1()
+    the value is 1
+    >>> c1()
+    the value is 2
+    >>> c2()
+    the value is 1
+    >>> c1()
+    the value is 3
+
+Most of the decorators above are closures.
+
+One good way to think of it is....
+
+    An object is data with associated function(s).
+    A closure is a function with associated data.
 
 
 
