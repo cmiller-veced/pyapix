@@ -18,7 +18,7 @@ from types import SimpleNamespace
 import time
 import jsonschema
 from jsonschema import FormatChecker
-from apis.tools import *
+from pyapix.apis.tools import *
 
 
 class info:

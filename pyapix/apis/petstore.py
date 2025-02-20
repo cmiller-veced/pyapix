@@ -97,10 +97,10 @@ def prep_func(config):
 
         ev_params = paths[endpoint][verb]['parameters'] or {}
         location = extract_from_dict_list(ev_params, 'in')
-        print('prepped')
-        print(endpoint, verb, list(ev_params))
-        print('location', location)
-        print('......')
+#         print('prepped')
+#         print(endpoint, verb, list(ev_params))
+#         print('location', location)
+#         print('......')
         request_params = {}
         query = {}
         form_data = {}
@@ -109,8 +109,8 @@ def prep_func(config):
         headers = {}
 
         assert type(args) is dict
-        print()
-        print(f'xx ep: {endpoint}  verb: {verb}')
+#         print()
+#         print(f'xx ep: {endpoint}  verb: {verb}')
         for arg in args:
 
             # TODO: 'query' is not a good default.
@@ -137,13 +137,13 @@ def prep_func(config):
                 if len(sp) == 3:
                     try:
                         int(sp[-1])
-                        print('yoohoo')
+#                         print('yoohoo')
                         plocation = 'data'             #  petstore-specific
                     except ValueError:
                         pass
-                print(endpoint, sp, arg)
+#                 print(endpoint, sp, arg)
                 
-            print(f'xx arg: {arg}  plocation: {plocation}')
+#             print(f'xx arg: {arg}  plocation: {plocation}')
 
             if plocation == 'path':
                 endpoint = endpoint.replace('{'+arg+'}', str(args[arg]))
@@ -158,7 +158,7 @@ def prep_func(config):
             elif plocation == 'data':
                 data[arg] = args[arg]
 
-        print()
+#         print()
         if query:
             request_params['params'] = query
         if verb in 'post put' and 'params' in request_params:
@@ -200,13 +200,13 @@ def parameters_to_schema(ev_info):
         # # TODO: figure out what the real problem is.
         # and fix in the appropriate place.
         case [{'name': thing}] if thing=='body':
-            print('.....................................yoohoo body GUARD')
+#             print('.....................................yoohoo body GUARD')
             return parameters[0]['schema']
         case [{'name': 'body'}]:   # identical to above and therefore unreachable.
-            print('.....................................yoohoo body')
+#             print('.....................................yoohoo body')
             return parameters[0]['schema']
         case [{'name': 'status'}]:  # {'name': 'status'} is definitely petstore-specific
-            print('yoohoo status')
+#             print('yoohoo status')
             return parameters[0]
 
     pr = extract_from_dict_list(parameters, 'required')

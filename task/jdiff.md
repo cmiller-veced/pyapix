@@ -1,8 +1,8 @@
 # The Task
 
-Given: An OpenAPI / Swagger file with errors.
-   Ie.  Does not accurately represent the service
-Return: A correct OpenAPI file (json doc)
+    Given: An OpenAPI / Swagger file with errors.
+       Ie.  Does not accurately represent the service
+    Return: A correct OpenAPI file (json doc)
 
 
 ## Alternatives
@@ -14,7 +14,7 @@ Return: A correct OpenAPI file (json doc)
 
 ### Benefits
 
-- we can use it to gennerate the client
+- we can use it to generate the client
 - facilitates communication
     - easy to show the OpenAPI publisher 
         - as a bug fix
@@ -35,7 +35,7 @@ Return: A correct OpenAPI file (json doc)
 # A new principal / property / acronym
 
 - MEAB: more eyes are better
-    MEMBD:  more eyes means better debugging
+- MEMBD:  more eyes means better debugging
 - LUD:  Let users debug
 
 

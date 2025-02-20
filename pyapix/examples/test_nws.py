@@ -16,14 +16,15 @@ from functools import lru_cache
 from collections import defaultdict
 import pytest
 
-from apis.tools import parsed_file_or_url
-from apis.api_tools import NonDictArgs
-from apis.nws import call, _validator, altered_raw_swagger, config
+
+from pyapix.apis.tools import parsed_file_or_url
+from pyapix.apis.api_tools import NonDictArgs
+from pyapix.apis.nws import call, _validator, altered_raw_swagger, config
 # TODO: consider making call behave like _validator.
 # The behavior of the two is currently maybe surprising / inconsistent.
 # but the code is currently minimal.
 # but the change will be a one-liner.
-from test_data.nws import test_parameters
+from pyapix.test_data.nws import test_parameters
 
 
 # TODO: clarify messaging.

@@ -13,23 +13,48 @@
 # THIS SOFTWARE.
 
 from collections import defaultdict
-
 import json
+import jsonschema
 import jsonref
+import pytest
 
-from apis.tools import parsed_file_or_url
-from apis.api_tools import NonDictArgs
-from apis.obis import _validator, call, config, altered_raw_swagger
-from test_data.obis import test_parameters
+
+from pyapix.apis.tools import parsed_file_or_url
+from pyapix.apis.api_tools import (NonDictArgs, ValidDataBadResponse,)
+from pyapix.apis.worms import _validator, call, config
+from pyapix.test_data.worms import test_parameters
+
+#from apis import api_tools
+
+def test_examples():
+    (endpoint, verb) = '/AphiaClassificationByAphiaID/{ID}', 'get'
+    validator = _validator(endpoint, verb)
+    parameters = {'ID': 127160 }
+    assert validator.is_valid(parameters)
+    response = call(endpoint, verb, parameters)
+    assert response.status_code == 200
+
+    (endpoint, verb) = '/AphiaRecordsByName/{ScientificName}', 'get'
+    validator = _validator(endpoint, verb)
+    parameters = {'ScientificName': 'Solea solea' }
+    assert validator.is_valid(parameters)
+    response = call(endpoint, verb, parameters)
+    rj = response.json()[0]
+    assert rj['kingdom'] == 'Animalia'
+    assert rj['authority'] == '(Linnaeus, 1758)'
+
+    parameters = {'foo': 'Solea solea' }
+    assert not validator.is_valid(parameters)
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        validator.validate(parameters)
 
 
 def test_validate_and_call():
-  try:
     bad_param_but_ok = defaultdict(list)
     good_param_not_ok = defaultdict(list)
-    jdoc = parsed_file_or_url(config.swagger_path)  # TODO: pass flag for deref vs not.?
+    jdoc = parsed_file_or_url(config.swagger_path)
     jdoc = jsonref.loads(json.dumps(jdoc))
-    paths = altered_raw_swagger(jdoc)['paths']
+    paths = config.alt_swagger(jdoc)['paths']
     for endpoint in paths:
         for verb in paths[endpoint]:
             print(endpoint, verb)
@@ -42,6 +67,7 @@ def test_validate_and_call():
 
                     print('   ok good valid', params)
                     response = call(endpoint, verb, params)
+                    gr = response
                     if not response.is_success:
                         good_param_not_ok[(endpoint, verb)].append(params)
                         raise ValidDataBadResponse(params)
@@ -54,12 +80,8 @@ def test_validate_and_call():
                         response = call(endpoint, verb, params)
                     except (NonDictArgs, KeyError):
                         continue
-#                        break
                     if response.is_success:
                         bad_param_but_ok[(endpoint, verb)].append(params)
-  finally:
     bad_param_but_ok = dict(bad_param_but_ok)
     good_param_not_ok = dict(good_param_not_ok)
-    globals().update(locals())
-
 

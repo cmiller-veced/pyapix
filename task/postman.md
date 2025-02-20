@@ -3,7 +3,7 @@
 Given: 
 We need a good way to prove that `pyapix' does the right thing.
 We need to hit lots of endpoints with lots of data and verify the results.
-On lots of APIs
+On lots of APIs.
 We need to hit individual endpoints.
 We need to hit a sequence of endpoints, thus doing meaningful work.
 We notice that Postman does exactly this.

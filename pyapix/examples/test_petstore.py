@@ -14,73 +14,85 @@
 
 from collections import defaultdict
 import json
-import jsonschema
+
 import jsonref
-import pytest
+import jsonschema
 
-from apis.tools import parsed_file_or_url
-from apis.api_tools import (NonDictArgs, ValidDataBadResponse,)
-from apis.worms import _validator, call, config
-from test_data.worms import test_parameters
+from pyapix.apis.tools import parsed_file_or_url
+from pyapix.apis.api_tools import NonDictArgs, SurpriseArgs
+from pyapix.apis.petstore import _validator, call, config, altered_raw_swagger
 
-#from apis import api_tools
-
-def test_examples():
-    (endpoint, verb) = '/AphiaClassificationByAphiaID/{ID}', 'get'
-    validator = _validator(endpoint, verb)
-    parameters = {'ID': 127160 }
-    assert validator.is_valid(parameters)
-    response = call(endpoint, verb, parameters)
-    assert response.status_code == 200
-
-    (endpoint, verb) = '/AphiaRecordsByName/{ScientificName}', 'get'
-    validator = _validator(endpoint, verb)
-    parameters = {'ScientificName': 'Solea solea' }
-    assert validator.is_valid(parameters)
-    response = call(endpoint, verb, parameters)
-    rj = response.json()[0]
-    assert rj['kingdom'] == 'Animalia'
-    assert rj['authority'] == '(Linnaeus, 1758)'
-
-    parameters = {'foo': 'Solea solea' }
-    assert not validator.is_valid(parameters)
-    with pytest.raises(jsonschema.exceptions.ValidationError):
-        validator.validate(parameters)
+from peemish import Sequence, request_for_service
+from peemish import test_seq, sequence_creator
 
 
 def test_validate_and_call():
+  try:
+    test_parameters = parsed_file_or_url('petstore_data.yaml')['test_parameters']
     bad_param_but_ok = defaultdict(list)
     good_param_not_ok = defaultdict(list)
-    jdoc = parsed_file_or_url(config.swagger_path)
+    surprise_args = defaultdict(list)
+    jdoc = parsed_file_or_url(config.swagger_path) #TODO:flag for deref vs not.?
     jdoc = jsonref.loads(json.dumps(jdoc))
-    paths = config.alt_swagger(jdoc)['paths']
+    paths = altered_raw_swagger(jdoc)['paths']
     for endpoint in paths:
         for verb in paths[endpoint]:
-            print(endpoint, verb)
+
             validator = _validator(endpoint, verb)
+            print(endpoint, verb)
             if endpoint in test_parameters:
                 things = test_parameters[endpoint]
-                for params in things['good']:
+                for params in things[verb]['good']:
                     if not validator.is_valid(params):
                         validator.validate(params)
 
                     print('   ok good valid', params)
-                    response = call(endpoint, verb, params)
-                    gr = response
+                    try:
+                        response = call(endpoint, verb, params)
+                    except SurpriseArgs as exc:
+                        surprise_args[(endpoint, verb)].append(params)
+                        continue
+#                    break  # after first params
+
                     if not response.is_success:
                         good_param_not_ok[(endpoint, verb)].append(params)
-                        raise ValidDataBadResponse(params)
+#                        raise ValidDataBadResponse(params)
+                        continue
                     if response.is_success:
                         print('   ok good call')
-                for params in things['bad']:
+#                break  # before bad ones
+                for params in things[verb]['bad']:
                     assert not validator.is_valid(params)
                     print('   ok bad NOT valid', params)
                     try:
                         response = call(endpoint, verb, params)
+                        if response.is_success:
+                            bad_param_but_ok[(endpoint, verb)].append(params)
                     except (NonDictArgs, KeyError):
                         continue
-                    if response.is_success:
-                        bad_param_but_ok[(endpoint, verb)].append(params)
+#        break  # after first endpoint
+
+  finally:
     bad_param_but_ok = dict(bad_param_but_ok)
     good_param_not_ok = dict(good_param_not_ok)
+    globals().update(locals())
+
+
+def run_seq(name=None):
+    data_file = '../test_data/pet_sequence.yaml'
+    create_sequence = sequence_creator(call, _validator, data_file)
+    snames = [name] if name else ['pet_other_sequence', 'pet_crud_sequence']
+    test_seq([create_sequence(sn) for sn in snames])
+
+
+petstore = parsed_file_or_url('../test_data/petstore_data.yaml')
+status = petstore['status']
+tags = petstore['tags']
+bad = petstore['bad']
+
+
+info = parsed_file_or_url('../test_data/pet_sequence.yaml')
+other = info['pet_other_sequence']
+for thing in other:
+    pass
 
