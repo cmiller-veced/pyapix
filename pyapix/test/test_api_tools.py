@@ -15,16 +15,16 @@
 import pytest
 import httpx
 
-from pyapix.apis import api_tools
-from pyapix.apis.api_tools import (
+from pyapix.tool import api_tools
+from pyapix.tool.api_tools import (
     parameters_to_schema, 
     dynamic_call, 
     dynamic_validator,
     prep_func,
     BadEndpointOrVerb,
 )
-import pyapix.apis
-import pyapix.apis.petstore
+import pyapix.client
+import pyapix.client.petstore
 
 
 def test_dvalidator(): 
@@ -61,7 +61,7 @@ def test_dvalidator():
         validate = lambda params: None
         api_base = 'petstore'
 
-    dv = pyapix.apis.petstore.dynamic_validator(config)
+    dv = pyapix.client.petstore.dynamic_validator(config)
 
     endpoint, verb = '/pet/findByStatus', 'get'
     validator = dv(endpoint, verb)
@@ -126,7 +126,7 @@ def test_prep_func():
         api_base = 'https://petstore.swagger.io/v2'
         head_func = lambda *pos, **kw: {}
 
-    pd = pyapix.apis.petstore.prep_func(config)
+    pd = pyapix.client.petstore.prep_func(config)
 
     uploadImage = False
     uploadImage = True
@@ -334,7 +334,7 @@ def test_parameters_to_schema():
              'type': 'object',
              'xml': {'name': 'User'}}}]
     ev_info = dict(parameters=parameters)
-    schema = pyapix.apis.petstore.parameters_to_schema(ev_info)
+    schema = pyapix.client.petstore.parameters_to_schema(ev_info)
 #    assert sorted(list(schema)) == ['additionalProperties', 'properties', 'required', 'type']
     assert schema['properties'] == parameters[0]['schema']['properties']
 

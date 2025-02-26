@@ -12,8 +12,8 @@
 # TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 # THIS SOFTWARE.
 
-from .tools import (LocalValidationError,)
-from .api_tools import (dynamic_validator, dynamic_call,)
+from pyapix.tool.tools import (LocalValidationError,)
+from pyapix.tool.api_tools import (dynamic_validator, dynamic_call,)
 from .info import local
 
 class ValidDataBadResponse(LocalValidationError): pass

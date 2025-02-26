@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 import typing
 
-from pyapix.apis.tools import parsed_file_or_url
+from pyapix.tool.tools import parsed_file_or_url
 
 count = 0  # for assigning sequential ID to service_request.
 

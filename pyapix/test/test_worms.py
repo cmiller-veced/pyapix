@@ -19,12 +19,11 @@ import jsonref
 import pytest
 
 
-from pyapix.apis.tools import parsed_file_or_url
-from pyapix.apis.api_tools import (NonDictArgs, ValidDataBadResponse,)
-from pyapix.apis.worms import _validator, call, config
+from pyapix.tool.tools import parsed_file_or_url
+from pyapix.tool.api_tools import (NonDictArgs, ValidDataBadResponse,)
+from pyapix.client.worms import _validator, call, config
 from pyapix.test_data.worms import test_parameters
 
-#from apis import api_tools
 
 def test_examples():
     (endpoint, verb) = '/AphiaClassificationByAphiaID/{ID}', 'get'

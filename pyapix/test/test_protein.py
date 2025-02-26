@@ -14,9 +14,9 @@
 
 from collections import defaultdict
 
-from pyapix.apis.api_tools import NonDictArgs
-from pyapix.apis.tools import parsed_file_or_url     #, raw_swagger
-from pyapix.apis.protein import _validator, call, altered_raw_swagger, config
+from pyapix.tool.api_tools import NonDictArgs
+from pyapix.tool.tools import parsed_file_or_url     #, raw_swagger
+from pyapix.client.protein import _validator, call, altered_raw_swagger, config
 from pyapix.test_data.protein import test_parameters
 
 

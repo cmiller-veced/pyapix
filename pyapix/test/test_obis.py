@@ -17,9 +17,9 @@ from collections import defaultdict
 import json
 import jsonref
 
-from pyapix.apis.tools import parsed_file_or_url
-from pyapix.apis.api_tools import NonDictArgs
-from pyapix.apis.obis import _validator, call, config, altered_raw_swagger
+from pyapix.tool.tools import parsed_file_or_url
+from pyapix.tool.api_tools import NonDictArgs
+from pyapix.client.obis import _validator, call, config, altered_raw_swagger
 from pyapix.test_data.obis import test_parameters
 
 

@@ -24,6 +24,7 @@ try:
     from pyapix.client import petstore as petstore_api
     from pyapix.client.petstore import _validator, call, config, altered_raw_swagger
 except:
+    raise
     from pyapix.apis.tools import parsed_file_or_url
     from pyapix.apis.api_tools import NonDictArgs, SurpriseArgs
     from pyapix.apis import petstore as petstore_api
@@ -32,8 +33,9 @@ except:
 
 try:
     from pyapix.tool.peemish import run_seq, sequence_creator
-    from pyapix.apis.peemish import run_seq, sequence_creator
+#    from pyapix.apis.peemish import run_seq, sequence_creator
 except:
+    raise
     exec(open('../tool/peemish.py').read())
 
 test_data_file = '../test_data/petstore_data.yaml'

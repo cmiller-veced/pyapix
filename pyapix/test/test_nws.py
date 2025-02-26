@@ -16,15 +16,9 @@ from functools import lru_cache
 from collections import defaultdict
 import pytest
 
-try:
-    from pyapix.tool.tools import parsed_file_or_url
-    from pyapix.tool.api_tools import NonDictArgs
-    from pyapix.client.nws import call, _validator, altered_raw_swagger, config
-except:
-    from pyapix.apis.tools import parsed_file_or_url
-    from pyapix.apis.api_tools import NonDictArgs
-    from pyapix.apis.nws import call, _validator, altered_raw_swagger, config
-
+from pyapix.tool.tools import parsed_file_or_url
+from pyapix.tool.api_tools import NonDictArgs
+from pyapix.client.nws import call, _validator, altered_raw_swagger, config
 
 # TODO: consider making call behave like _validator.
 # The behavior of the two is currently maybe surprising / inconsistent.

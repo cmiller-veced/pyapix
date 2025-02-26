@@ -14,7 +14,7 @@
 
 # WoRMS: World Register of Marine Species
 
-from .api_tools import dynamic_validator, dynamic_call
+from pyapix.tool.api_tools import dynamic_validator, dynamic_call
 from .info import local
 
 

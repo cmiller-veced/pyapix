@@ -18,9 +18,10 @@ from .info import local
 try:
     from pyapix.tool.tools import LocalValidationError, ValidDataBadResponse
     from pyapix.tool.api_tools import dynamic_validator, dynamic_call, SurpriseArgs
-    from pyapix.tool. import api_tools
+    from pyapix.tool import api_tools
     from pyapix.tool.api_tools import *
 except:
+    raise
     from .tools import (LocalValidationError, ValidDataBadResponse, )
     from .api_tools import dynamic_validator, dynamic_call, SurpriseArgs
     from . import api_tools
