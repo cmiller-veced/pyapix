@@ -18,17 +18,33 @@ import json
 import jsonref
 import jsonschema
 
-from pyapix.apis.tools import parsed_file_or_url
-from pyapix.apis.api_tools import NonDictArgs, SurpriseArgs
-from pyapix.apis.petstore import _validator, call, config, altered_raw_swagger
+try:
+    from pyapix.tool.tools import parsed_file_or_url
+    from pyapix.tool.api_tools import NonDictArgs, SurpriseArgs
+    from pyapix.client import petstore as petstore_api
+    from pyapix.client.petstore import _validator, call, config, altered_raw_swagger
+except:
+    from pyapix.apis.tools import parsed_file_or_url
+    from pyapix.apis.api_tools import NonDictArgs, SurpriseArgs
+    from pyapix.apis import petstore as petstore_api
+    from pyapix.apis.petstore import _validator, call, config, altered_raw_swagger
 
-from peemish import Sequence, request_for_service
-from peemish import test_seq, sequence_creator
+
+try:
+    from pyapix.tool.peemish import run_seq, sequence_creator
+    from pyapix.apis.peemish import run_seq, sequence_creator
+except:
+    exec(open('../tool/peemish.py').read())
+
+test_data_file = '../test_data/petstore_data.yaml'
+pet_sequence_file = '../test_data/pet_sequence.yaml'
+petstore_data = parsed_file_or_url(test_data_file)
+sequence_data = parsed_file_or_url(pet_sequence_file)
 
 
 def test_validate_and_call():
   try:
-    test_parameters = parsed_file_or_url('petstore_data.yaml')['test_parameters']
+    test_parameters = petstore_data['test_parameters']
     bad_param_but_ok = defaultdict(list)
     good_param_not_ok = defaultdict(list)
     surprise_args = defaultdict(list)
@@ -78,21 +94,8 @@ def test_validate_and_call():
     globals().update(locals())
 
 
-def run_seq(name=None):
-    data_file = '../test_data/pet_sequence.yaml'
-    create_sequence = sequence_creator(call, _validator, data_file)
+def test_seq(name=None):
+    create_sequence = sequence_creator(petstore_api, sequence_data)
     snames = [name] if name else ['pet_other_sequence', 'pet_crud_sequence']
-    test_seq([create_sequence(sn) for sn in snames])
-
-
-petstore = parsed_file_or_url('../test_data/petstore_data.yaml')
-status = petstore['status']
-tags = petstore['tags']
-bad = petstore['bad']
-
-
-info = parsed_file_or_url('../test_data/pet_sequence.yaml')
-other = info['pet_other_sequence']
-for thing in other:
-    pass
+    run_seq([create_sequence(sequence_data[sn]) for sn in snames])
 

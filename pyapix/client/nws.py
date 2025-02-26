@@ -14,9 +14,14 @@
 
 from datetime import datetime
 
-from .tools import LocalValidationError
-from .api_tools import dynamic_validator, dynamic_call
-from .info import local
+try:
+    from pyapix.tool.tools import LocalValidationError
+    from pyapix.tool.api_tools import dynamic_validator, dynamic_call
+    from .info import local
+except:
+    from .tools import LocalValidationError
+    from .api_tools import dynamic_validator, dynamic_call
+    from .info import local
 
 
 class DateOrderError(LocalValidationError): pass

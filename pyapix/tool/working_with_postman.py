@@ -6,22 +6,24 @@ I've made good progress deciphering body and headers for each request.
 But to make further progress I need to be able to hit the endpoints.
 NO.
 One more place where I could make progress now is in replacing vars.
+and validation.
 
 """
 import os
 import json
 from functools import lru_cache
 from pyapix.apis.tools import parsed_file_or_url, raw_file_or_url
-from exploratory import pop_inputs, pop_key
 import typing
 from typing import TypedDict
 from typing import Required, NotRequired
+
+from .exploratory import pop_inputs, pop_key
 
 items_seen = []
 requests_seen = []
 
 
-def test_do_item(pm_files):
+def check_do_item(pm_files):
   try:
     for fpath in pm_files():
         with open(fpath) as fh: 
@@ -234,7 +236,7 @@ def write_data():
     # !!!!!!!!!! WARNING !!!!!!!!!!
     # Use great caution when writing yaml because it can come out quite garbled.
     # All info will be there but with references not very readable.
-    from pyapix.test_data import petstore
+#    from pyapix.test_data import petstore
     import yaml
     globals().update(locals())
     fname = 'petstore_dataX.yaml'
@@ -253,6 +255,94 @@ def postman_schema():
     # for schema.  But that link is   301 Permanently moved.
     postman_schema = 'https://schema.postman.com/collection/json/v2.1.0/draft-07/collection.json'
     return parsed_file_or_url(postman_schema)
+
+
+def fix_colon_prefix(path):
+  try:
+    """
+    Accomodate a Postman quirk.
+    >>> path = '/foo/:bar/bat/:ratHatCat'
+    >>> assert fix_colon_prefix(path) == '/foo/{{bar}}/bat/{{rat_hat_cat}}'
+    """
+    if ':' not in path:
+        return path
+    words = path.split('/')
+    for (i, word) in enumerate(words):
+        if word.startswith(':'):
+            new = []
+            for char in word[1:]:
+                if char.isupper():
+                    new.append('_')
+                    new.append(char.lower())
+                else:
+                    new.append(char)
+            words[i] = '{{' + ''.join(new) + '}}'
+    return '/'.join(words)
+  finally:
+    globals().update(locals())
+
+
+def decode_url(url):
+  try:
+    """For working with Postman.
+    But should be much more general.
+    """
+    if not '?' in url:
+        return (fix_colon_prefix(url), '')
+    assert url.count('?') == 1
+    front, end = url.split('?')
+    parts = end.split('&')
+    assert  all(len(x.split('='))==2 for x in parts)
+    query_params = dict(x.split('=') for x in parts)
+    front = fix_colon_prefix(front)
+    return (front, query_params)
+  finally:
+    globals().update(locals())
+
+
+def test_decode_url():
+  try:
+    urls = """
+/crs/catalog/v3/coordinate-reference-system?dataId=Geographic2D:EPSG::4158&recordId=osdu:reference-data--CoordinateReferenceSystem:Geographic2D:EPSG::4158
+/register/v1/action/:id
+/register/v1/action:retrieve
+/register/v1/subscription/:id/secret
+/unit/v3/unit/unitsystem?unitSystemName=English&ancestry=Length&offset=0&limit=100
+/unit/v3/unit/measurement?ancestry=1
+/unit/v3/conversion/abcd?namespaces=Energistics_UoM&fromSymbol=ppk&toSymbol=ppm
+/unit/v3/conversion/abcd
+/legal/v1/legaltags:query?valid=true
+/entitlements/v2/groups/:groupEmail/members/:memberEmail
+/entitlements/v2/members/:memberEmail/groups?type=DATA
+    """.split()
+    for url in urls:
+        front, query_params = decode_url(url)
+        print(url)
+        print(front)
+        print(query_params)
+        print()
+
+    # One-time dev stuff below.....
+    eswagger = '~/osdu/service/entitlements/docs/api/entitlements_openapi.yaml'
+    ejson = parsed_file_or_url(eswagger)
+    eps = list(ejson['paths'])
+    # AHA!    brainwave!!! 
+    # The OSDU openapi files violate the standard thus...
+    # /groups/:groupEmail/members/:memberEmail
+    # should be
+    # /groups/{group_email}/members/{member_email}
+    # I guess they think they know better.
+
+    lswagger = '~/osdu/service/legal/docs/api/legal_openapi.yaml'
+    ljson = parsed_file_or_url(lswagger)
+    lps = list(ljson['paths'])
+
+    sp = '~/osdu/service/register/docs/api/register_openapi.yaml'
+    js = parsed_file_or_url(sp)
+    rps = list(js['paths'])
+
+  finally:
+    globals().update(locals())
 
 
 def insert_params(template, parameters):
@@ -328,8 +418,4 @@ def test_environment_update():
         assert thing['foo'] == value
     environment.reset()
     assert environment.current == {}
-
-test_environment_update()
-import doctest
-doctest.testmod()
 

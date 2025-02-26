@@ -1,9 +1,8 @@
 import os
 from pyapix.apis.tools import parsed_file_or_url
-import working_with_postman as wp
-from working_with_postman import (
-    has_items, is_request, is_item_or_request_but_not_both, fetch_thing,
-    test_do_item, do_item,
+from . import working_with_postman as wp
+from .working_with_postman import (
+    is_request, fetch_thing, 
     )
 
 
@@ -108,8 +107,4 @@ def test_fetch_thing():
     tx_auth = tx['request']['auth']        #['']
   finally:
     globals().update(locals())
-
-
-test_do_item(pm_files)
-test_fetch_thing()
 
