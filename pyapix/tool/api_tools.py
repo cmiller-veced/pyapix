@@ -16,7 +16,7 @@ import json
 import jsonref
 from jsonschema import FormatChecker
 import httpx
-from . tools import (dvalidator, parsed_file_or_url, identity_func,
+from pyapix.tool.tools import (dvalidator, parsed_file_or_url, identity_func,
                    extract_from_dict_list,
                    retry_call,
                    LocalValidationError,
