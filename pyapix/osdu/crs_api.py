@@ -1,17 +1,11 @@
 
 from datetime import datetime
 
-# from . import api_tools
-# from .api_tools import (dynamic_validator, dynamic_call, SurpriseArgs)
-# from .api_tools import *
-# from .tools import (LocalValidationError, ValidDataBadResponse, )
-# from .info import local
-
-from pyapix.apis import api_tools
-from pyapix.apis.api_tools import (dynamic_validator, dynamic_call, SurpriseArgs)
-from pyapix.apis.api_tools import *
-from pyapix.apis.tools import (LocalValidationError, ValidDataBadResponse, )
-from pyapix.apis.info import local
+from pyapix.tool import api_tools
+from pyapix.tool.api_tools import (dynamic_validator, dynamic_call, SurpriseArgs)
+from pyapix.tool.api_tools import *
+from pyapix.tool.tools import (LocalValidationError, ValidDataBadResponse, )
+from pyapix.client.info import local
 
 class Foo(LocalValidationError): pass
 
@@ -56,9 +50,9 @@ call = dynamic_call(config)
 # end of the API client
 # ############################################################################
 
-from pyapix.apis.tools import parsed_file_or_url
-from .working_with_postman import fetch_thing, insert_params
-from .do_postman_osdu import pm_files
+from pyapix.tool.tools import parsed_file_or_url
+from pyapix.tool.working_with_postman import fetch_thing, insert_params
+from pyapix.tool.do_postman_osdu import pm_files
 
 # Fill in some missing functionality in api_tools.
 
