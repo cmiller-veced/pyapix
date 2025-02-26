@@ -12,12 +12,12 @@ and validation.
 import os
 import json
 from functools import lru_cache
-from pyapix.apis.tools import parsed_file_or_url, raw_file_or_url
 import typing
 from typing import TypedDict
 from typing import Required, NotRequired
 
-from .exploratory import pop_inputs, pop_key
+from pyapix.tool.tools import parsed_file_or_url, raw_file_or_url
+from pyapix.tool.exploratory import pop_inputs, pop_key
 
 items_seen = []
 requests_seen = []

@@ -20,9 +20,9 @@ Because Postman now requires a cloud account.
 
 """
 import os
-from pyapix.apis.tools import parsed_file_or_url
-from . import working_with_postman as wp
-from .working_with_postman import (
+from pyapix.tool.tools import parsed_file_or_url
+from pyapix.tool import working_with_postman as wp
+from pyapix.tool.working_with_postman import (
     is_request, fetch_thing,
 )
 
