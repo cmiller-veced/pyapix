@@ -1,4 +1,3 @@
-
 from datetime import datetime
 
 from pyapix.tool import api_tools
@@ -8,28 +7,12 @@ from pyapix.tool.tools import (LocalValidationError, ValidDataBadResponse, )
 from pyapix.client.info import local
 
 
-class Foo(LocalValidationError): pass
-
-
 def local_validate(params):
-    """Catch data problems missed by the schema.
-    # eg start_date > end_date
-    params = {
-        'start': '2024-09-17T18:39:00+00:00', 
-        'end':   '2024-09-18T18:39:00+00:00',
-    }
-    """
-    fmt = '%Y-%m-%dT%H:%M:%S+00:00'
+    return
 
 
 def altered_raw_swagger(jdoc):
-  try:
-    """Alter raw data to conform with local code assumptions.
-    This function takes a swagger doc as a json and returns json.
-    """
     return jdoc
-  finally:
-    pass
 
         
 def head_func(endpoint, verb):
@@ -56,12 +39,17 @@ from pyapix.tool.working_with_postman import fetch_thing, insert_params
 from pyapix.tool.do_postman_osdu import pm_files
 from pyapix.tool import do_postman_osdu
 from pyapix.tool.api_tools import endpoints_ands_verbs
+from pyapix.tool.tools import list_of_dict_to_dict
 
+one_dict = list_of_dict_to_dict()
 
-# Fill in some missing functionality in api_tools.
+service_parts = ['api', 'crs', 'catalog', 'conversion', 'search', 'storage',
+                 'legal'
+]
 
+# Fill in some missing functionality in tool.tools.
 
-def inspect_swagger():
+def test_inspect_swagger():
   try:
     """
     CRS Catalog
@@ -71,7 +59,6 @@ def inspect_swagger():
     evs = endpoints_ands_verbs(jdoc)[:-1][:1]   # just the first endpoint
     evs = endpoints_ands_verbs(jdoc)[:-1]   # ignore /info
     evs = endpoints_ands_verbs(jdoc)
-    #                     /v4/convertTrajectory post
     for (e, v) in evs:
         print(e, v)
         ev = jdoc['paths'][e][v]
@@ -79,37 +66,41 @@ def inspect_swagger():
     defs = jdoc['definitions']
     point = defs['Point']
     ps = defs['PointsInAOUSearch']
-#    assert ctr['required'] == ['inputStations', 'method', 'trajectoryCRS', 'unitZ']
     
     # TODO: leverage examples  in definitions.
   finally:
     globals().update(locals())
 
 
-# TODO: mv to tools.py and generalize
-def list_to_dict(list_of_dict):
-    k = 'key'
-    v = 'value'
-    return {d[k]:d[v] for d in list_of_dict}
-
-# TODO: mv to tools.py
-def list_of_dict_to_dict(key='key', value='value'):
-    def inner(list_of_dict):
-        return {d[key]: d[value] for d in list_of_dict}
-    return inner
-one_dict = list_of_dict_to_dict('key', 'value')
+def is_version(word):
+    """
+    >>> assert is_version('v3') is True
+    >>> assert is_version('v222') is True
+    >>> assert is_version('V222') is True
+    >>> assert is_version('vx2') is False
+    """
+    if word[0].lower() == 'v' and word[1:].isdigit():
+        return True
+    return False
 
 
-def inspect_postman():
+def is_bad_schema(schema):
+    if schema == { 'required': [], 'properties': {},
+     'additionalProperties': False, 'type': 'object'}:
+        return True
+    if schema['properties'] == {} and schema['additionalProperties'] == False:
+        return True
+    return False
+
+
+def test_crs_catalog():
   try:
-    """
-    """
     pmjdoc = parsed_file_or_url(pm_files()[0])
-    x = fetch_thing(pmjdoc)
-    assert x == pmjdoc
+    assert fetch_thing(pmjdoc) == pmjdoc
 
     names = ['Core Services', 'CRS Catalog', 'V3']
     ct = fetch_thing(pmjdoc, *names)
+
     rnames = [thing['name'] for thing in ct['item']]
     assert rnames == [
         'Search Coordinate Transformation', 
@@ -119,72 +110,52 @@ def inspect_postman():
         'Search Coordinate Reference Systems', 
         'Coordinate Reference System', 
         'Check area of use']
+
     for name in rnames:
         noms = names + [name]
         ct = fetch_thing(pmjdoc, *noms)
         ctr = ct['request']
         method = ctr['method']
         url = ctr['url']
+
         if 'body' in ctr:
             ctrb = ctr['body']
             assert sorted(list(ctrb)) == ['mode', 'options', 'raw']
             if ctrb['mode'] == 'raw':
                 bdecoded = json.loads(ctrb['raw'])
-            ctr.pop('body')
         else:
-            ctrb = ''
             bdecoded = ''
-        for word in 'auth header'.split():
-            ctr.pop(word)       # for easier inspection.
+
+        # TODO: get endpoint            DONE
+        up = url['path']
+        for i, word in enumerate(up):
+            if is_version(word):
+                svc = up[:i+1]
+                endpoint = '/' + '/'.join(up[i+1:])
+        verb = method.lower()
+
+        v = _validator(endpoint, verb)
+        schema = v.v.schema   # in case we want to have a look.
+
+        # TODO:  insert template variables...     DONE
+        dpi = one_dict(ctr['header'])['data-partition-id']
+        source = dict(data_partition_id='foo..dpi..bar')
+        subbed = insert_params(dpi, source)
+
+        # TODO: validate postman data   DONE
+        params = one_dict(url['query']) if 'query' in url else {}
+        if bdecoded:
+            params['body'] = bdecoded
+        isvalid = v.is_valid(params)
+        if is_bad_schema(schema):
+            isvalid = 'crap schema'
+            assert endpoint, verb == ('/coordinate-reference-system', 'get')
+
         print(name)
-        print('body', bdecoded)
-        print('url', url)
-        if 'query' in url:
-            rd = url['query']
-            nd = list_to_dict(url['query'])
-            nn = one_dict(url['query'])
-            assert nd == nn
-        print(method)
-        # TODO: get endpoint
-        # TODO: and then do everything else the test_crs_catalog function is
-        # doing.
-        # We've already decoded all bodies.
+        print(endpoint, verb)
+        print('params', params)
+        print('............', isvalid)
         print()
-  finally:
-    globals().update(locals())
-
-def test_crs_catalog():
-  try:
-    endpoint, verb = '/v4/convertTrajectory', 'post'
-
-    # v = _validator((endpoint, verb))
-    # TODO: NOTE  _validator.__doc__ was helpful here in debugging the line
-    # above.
-    v = _validator(endpoint, verb)
-    params = dict(body={})
-    assert not v.is_valid(params)
-
-    # TODO: substitute in template before decoding.
-    # DONE
-    source = dict(data_partition_id='....dpi.....')
-    subbed = insert_params(ctrb['raw'], source)
-    good_body = json.loads(subbed)
-    params = dict(body=good_body)
-    v.validate(params)
-    good_body['azimuthReference'] = 1
-    assert not v.is_valid(params)
-    good_body = json.loads(subbed)
-    params = dict(body=good_body)
-    v.validate(params)
-    good_body['azimuthReference'] = 'TRUE_NORTH'
-    v.validate(params)
-
-    schema = v.v.schema   # in case we want to have a look.
-    # TODO: celebrate !!!!!!!!!!!!!!!!!!!!
-    # yahooooooo!!!!!!!!!!!!!!!
-    # This kicks ass!!!!!!!!!!!!
-    # or at least is the POC.
-    # It shows that asses will be kicked!!!!!!!!!!!
   finally:
     globals().update(locals())
 

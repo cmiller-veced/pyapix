@@ -12,6 +12,8 @@
 # TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 # THIS SOFTWARE.
 
+# TODO: rename tools.py   ->  jtools.py    ?????
+
 import time
 import json
 import os
@@ -110,4 +112,30 @@ def dvalidator(local_validate):
             return local_validate(thing)
 
     return D7V
+
+
+def list_of_dict_to_dict(key='key', value='value'):
+    """
+    >>> dlist = [
+    ...     dict(key='foo', value=2),
+    ...     dict(key='bar', value=9),
+    ...     dict(key='bat', value=8, x=3),
+    ... ]
+    ... 
+    >>> one_dict = list_of_dict_to_dict()
+    >>> assert one_dict(dlist) == {'foo': 2, 'bar': 9, 'bat': 8}
+
+    >>> dlist = [
+    ...     dict(clave='foo', v=2),
+    ...     dict(clave='bar', v=9),
+    ...     dict(clave='bat', v=8, x=3),
+    ... ]
+    ...
+    >>> one_dict = list_of_dict_to_dict('clave', 'v')
+    >>> assert one_dict(dlist) == {'foo': 2, 'bar': 9, 'bat': 8}
+
+    """
+    def inner(list_of_dict):
+        return {d[key]: d[value] for d in list_of_dict}
+    return inner
 
