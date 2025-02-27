@@ -21,10 +21,13 @@ from pyapix.tool.exploratory import pop_inputs, pop_key
 
 items_seen = []
 requests_seen = []
+all_requests = []
 
 
 def check_do_item(pm_files):
   try:
+    global all_requests
+    all_requests = []
     for fpath in pm_files():
         with open(fpath) as fh: 
             jdoc = json.load(fh)
@@ -96,6 +99,8 @@ def do_headers(headers):
 def do_request(thing, indent):
   try:
     assert is_request(thing)
+    global all_requests
+    all_requests.append(thing)
     assert not has_items(thing)
     global requests_seen
     requests_seen.append(thing['name'])

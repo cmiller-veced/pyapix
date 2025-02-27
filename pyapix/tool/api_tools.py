@@ -32,6 +32,10 @@ class ListArgs(SurpriseArgs): pass
 class BadEndpointOrVerb(Exception): pass
 
 
+def endpoints_ands_verbs(jdoc):
+    return [(p,v) for p in jdoc['paths'] for v in jdoc['paths'][p]]
+
+
 def parameters_to_schema(ev_info):
     if 'parameters' in ev_info:
         parameters = ev_info['parameters']

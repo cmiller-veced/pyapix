@@ -108,3 +108,79 @@ def test_fetch_thing():
   finally:
     globals().update(locals())
 
+
+from pyapix.tool.exploratory import pop_key
+
+@pop_key('event')
+@pop_key('response')
+def strip_it(req):
+    req['url'] = req['request']['url']['raw']
+    req.pop('request')
+    return req
+
+
+def good_one(req):
+    try:
+        return req['request']['url']['path'][1] == 'crs'
+    except KeyError:
+        return False
+ 
+
+def all_requests(pm_files):
+    wp.check_do_item(pm_files)
+    return wp.all_requests 
+
+
+def filtered_list(lst, good_one):
+    return [x for x in lst if good_one(x)]
+
+
+# ########################################################################## # 
+
+def decode_query(reqs):
+    svs = set()
+    for req in reqs:
+        name = req['name']
+        if not 'url' in req:
+            print(name, 'x'*44, 'no url')
+            continue
+        url = req['url'][26:]
+        u, p = wp.decode_url(url)
+        us = u.split('/')
+        service = us[1] if len(us)>1 else 'unknown service'
+        svs.add(service)
+        if len(us)>1:
+            endpoint = '/' + '/'.join(us[2:])
+        else:
+            endpoint = ''
+        print(name)
+        print(f'    {u}')
+        print(f'    {service}.......{endpoint}')
+        print(f'    {p}')
+        print()
+    print(svs)
+
+
+ar = all_requests(pm_files)
+crs_req = filtered_list(ar, good_one)
+assert len(crs_req) == 14
+crs_req = [strip_it(x) for x in crs_req]
+assert len(crs_req) == 14
+decode_query(crs_req)
+
+ars = [strip_it(r) for r in all_requests(pm_files)]
+#decode_query(ars)
+
+
+# iterate over Postman file.                   DONE
+# Find all calls to CRS Conversion.            DONE
+# For each call, 
+#     translate url(PM) to endpoint(pyapiX)    DONE
+#     grab the parameters                      DONE
+#     validate the parameters                  crs/conversion has none
+#                                              I will have to make a client for
+#                                              another service.
+#                                              crs/catalog has some
+# store the parameters in yaml?
+
+
