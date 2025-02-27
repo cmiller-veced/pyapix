@@ -18,7 +18,7 @@ requests_seen = []
 all_requests = []
 
 
-# TODO: rename?
+# TODO: rename?   This is used in other two other files.
 def check_do_item(pm_files):
   try:
     global all_requests
@@ -161,7 +161,7 @@ def fix_colon_prefix(path):
 
 
 
-# All solid below here.
+# solid below here.
 # ######################################################################## #
 
 
@@ -253,7 +253,7 @@ def fetch_thing(jdoc, *names):
     ... 
     >>> mid = [
     ...     dict(name='bar', item=innermost),
-    ...     dict(name='c', t=3),
+    ...     dict(name='c', t=3, item=[]),
     ...     dict(name='d'),
     ... ]
     ... 
