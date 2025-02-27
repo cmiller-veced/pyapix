@@ -1,14 +1,8 @@
 """
 Working with Postman files.
-
 The focus is on OSDU preshipping.
-I've made good progress deciphering body and headers for each request.
-But to make further progress I need to be able to hit the endpoints.
-NO.
-One more place where I could make progress now is in replacing vars.
-and validation.
-
 """
+
 import os
 import json
 from functools import lru_cache
@@ -16,7 +10,7 @@ import typing
 from typing import TypedDict
 from typing import Required, NotRequired
 
-from pyapix.tool.tools import parsed_file_or_url, raw_file_or_url
+from pyapix.tool.tools import parsed_file_or_url
 from pyapix.tool.exploratory import pop_inputs, pop_key
 
 items_seen = []
@@ -24,6 +18,7 @@ requests_seen = []
 all_requests = []
 
 
+# TODO: rename?
 def check_do_item(pm_files):
   try:
     global all_requests
@@ -38,6 +33,7 @@ def check_do_item(pm_files):
     globals().update(locals())
 
 
+# TODO: review
 def do_item(thing, indent=0):
   try:
     is_item_or_request_but_not_both(thing)
@@ -62,19 +58,7 @@ def do_item(thing, indent=0):
     globals().update(locals())
 
 
-# OK.  Successfully decoded all bodies in OSDU.
-def decode_body(body):
-  try:
-    bm = body['mode']
-    assert bm in ['raw', 'urlencoded', 'file']
-    br = body[bm]
-    if (type(br) is not str) or (not br):
-        return br
-    return json.loads(br)
-  finally:
-    globals().update(locals())
-
-
+# untidy
 # OK.  Successfully decoded all headers in OSDU.
 def do_headers(headers):
   try:
@@ -96,6 +80,7 @@ def do_headers(headers):
     globals().update(locals())
 
 
+# untidy
 def do_request(thing, indent):
   try:
     assert is_request(thing)
@@ -130,93 +115,6 @@ def do_request(thing, indent):
     globals().update(locals())
 
 
-def exp_with_postman_schema():
-    pm_schema = parsed_file_or_url('~/local/postman/2.1.0.json')
-    request_schema = pm_schema['definitions']['request']
-    pm_defs = pm_schema['definitions']
-    ['$schema', '$id', 'title', 'description', 'oneOf']
-    ['url', 'auth', 'proxy', 'certificate', 'method', 'description', 'header', 'body']
-
-    script_schema = pm_schema['definitions']['script']
-    ['$schema', '$id', 'title', 'type', 'description', 'properties']
-    ['id', 'type', 'exec', 'src', 'name']
-
-
-def exp_with_TypedDict():
-    Point2D = TypedDict('Point2D', {'in': int, 'x-y': int})
-    # TODO: NOTE
-    # This is interesting.  Keys that are keywords or contain '-'.
-    # Could be useful when we want to use keys like 
-    # /zones/:type/:zoneId
-    Point2D = TypedDict('Point2D', {'/zones/:type/:zoneId': int, 'x-y': int})
-
-    p2 = Point2D( {'z': 3, 'label': 'bad'})
-    p2 = Point2D(t= 3, label= 'bad')
-
-
-class Request(TypedDict, total=True):
-    header: Required[dict]
-    body: typing.Dict  = None
-    description: str  = None
-    method: str     # enum
-    url: str     # matching a regex
-
-class MyParameters(TypedDict, total=True):
-    header: NotRequired[dict]
-    body: NotRequired[dict]
-    query: NotRequired[dict]
-    args: NotRequired[dict] = {}
- 
-class MyRequest(TypedDict, total=True):
-    endpoint: str     # matching a regex
-    method: str     # enum
-    parameters: MyParameters = None
-    post_test:  typing.Callable   = lambda _:None
-    # TODO?: auth: dict  # or such?
-
-# MyRequest and MyParameters can be used together to create a Request object.
-# That will be the mapping between my stuff and Postman schema.
-
-mr = MyRequest()
-mr = MyRequest(ep=1)
-mr = MyRequest(endpoint=1, method='have', parameters={})
-
-rt = Request()
-rt = Request(x=2)
-rt = Request(header=2, url='u', method='m')
-
-
-# TODO: maybe call it fetch_postman_thing
-@pop_key('response')
-@pop_key('event')
-def fetch_thing(jdoc, *names):
-  try:
-    """ snappy
-    But definitely needs a doctest.
-    Also is near to being quite general.
-    The two hard-coded names keep it from being general.
-    """
-    sub = jdoc
-    for name in names:
-        for thing in sub['item']:
-            if thing['name'] == name:
-                sub = thing
-                break     # the first thing with that name
-    return sub
-  finally:
-    globals().update(locals())
-
-# OK
-# Now we can
-# 1. Recursively iterate over all things.
-# 2. Fetch arbitrary, deeply nested things.
-# TODO: 
-# - run individual request.
-# - run a sequence of requests.
-# - cleanup the jdoc by removing empty things.
-# - add and subtract things.
-
-
 def has_items(thing):
     return 'item' in thing
 
@@ -236,36 +134,11 @@ def is_item_or_request_but_not_both(thing):
     # pprint(set(verified_mutually_exclusive))
 
 
-def write_data():
-    # TODO: write petstore to yaml.
-    # !!!!!!!!!! WARNING !!!!!!!!!!
-    # Use great caution when writing yaml because it can come out quite garbled.
-    # All info will be there but with references not very readable.
-#    from pyapix.test_data import petstore
-    import yaml
-    globals().update(locals())
-    fname = 'petstore_dataX.yaml'
-    data = petstore.__dict__
-    for key in dubs:
-        data.pop(key)
-    with open (fname, 'w') as fh:
-        yaml.dump(data, fh)
-
-
-@lru_cache
-def postman_schema():
-    # all postman schemas == v1.0.0  v2.0.0  v2.1.0
-    # OSDU Preshipping postman files have this...
-    'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
-    # for schema.  But that link is   301 Permanently moved.
-    postman_schema = 'https://schema.postman.com/collection/json/v2.1.0/draft-07/collection.json'
-    return parsed_file_or_url(postman_schema)
-
-
+# TODO: if any of the url/path/query parsing stuff is needed, it is this.
 def fix_colon_prefix(path):
   try:
     """
-    Accomodate a Postman quirk.
+    Accomodate a Postman quirk.   Or is it an OSDU quirk?
     >>> path = '/foo/:bar/bat/:ratHatCat'
     >>> assert fix_colon_prefix(path) == '/foo/{{bar}}/bat/{{rat_hat_cat}}'
     """
@@ -287,6 +160,177 @@ def fix_colon_prefix(path):
     globals().update(locals())
 
 
+
+# All solid below here.
+# ######################################################################## #
+
+
+# solid
+def insert_params(template, parameters):
+    """
+    >>> url = '{{base_url}}/api/search/v2/query'
+    >>> ps = dict(base_url='xxxxxxxx')
+    >>> x = insert_params(url, ps)
+    >>> assert x == 'xxxxxxxx/api/search/v2/query'
+
+    >>> template = 'xyz {{abc}} wvp'
+    >>> abc = 'xxxxxxxx'
+    >>> x = insert_params(template, locals())
+    >>> assert x == 'xyz xxxxxxxx wvp'
+    """
+    from jinja2 import select_autoescape 
+    from jinja2 import Environment as j2Environment
+    env = j2Environment(autoescape=select_autoescape())
+    return env.from_string(template).render(**parameters)
+
+
+# solid
+class Environment:
+    """A hierarchy of environments, ala Postman.
+    >>> environment = Environment()
+    >>> assert 'k' not in environment.general
+    >>> assert 'k' not in environment.current
+    >>> environment.request['k'] = 'v'
+    >>> assert environment.current['k'] == 'v'
+    >>> assert 'k' not in environment.general
+    >>> environment.reset()
+    >>> assert environment.current == {}
+    >>> assert environment.request == {}
+    """
+    def __init__(self):
+        self._current = {}
+        self.general = {}
+        self.collection = {}
+        self.sequence = {}
+        self.request = {}
+
+    def update(self):
+        for source in [self.general, self.collection, self.sequence, self.request]:
+            self._current.update(source)
+#        globals().update(self._current)    # ?
+
+    @property
+    def current(self):
+        self.update()
+        return self._current
+
+    def reset(self):
+        self.general = {}
+        self.collection = {}
+        self.sequence = {}
+        self.request = {}
+        self._current = {}
+
+
+def test_environment():
+    environment = Environment()
+    assert environment.current == {}
+    things = [
+        (environment.general, None),
+        (environment.collection, 2),
+        (environment.sequence, 22),
+        (environment.request, 222),
+    ]
+    for (thing, value) in things:
+        thing['foo'] = value
+    assert 'foo' in environment.current
+    assert environment.current['foo'] == environment.request['foo']
+    for (thing, value) in things:
+        assert thing['foo'] == value
+    environment.reset()
+    assert environment.current == {}
+
+
+# solid
+# TODO: maybe call it fetch_postman_thing
+def fetch_thing(jdoc, *names):
+    """
+    >>> innermost = [
+    ...     dict(name='bat', t=1),
+    ...     dict(name='x', t=2),
+    ...     dict(name='y'),
+    ... ]
+    ... 
+    >>> mid = [
+    ...     dict(name='bar', item=innermost),
+    ...     dict(name='c', t=3),
+    ...     dict(name='d'),
+    ... ]
+    ... 
+    >>> outermost = dict(item=[
+    ...     dict(name='foo', item=mid),
+    ...     dict(name='a', item=[]),
+    ...     dict(name='b'),
+    ... ])
+    ... 
+
+    >>> assert fetch_thing(outermost) == outermost
+    >>> assert fetch_thing(outermost, 'foo') == dict(name='foo', item=mid)
+    >>> assert fetch_thing(outermost, 'foo', 'bar') == dict(name='bar', item=innermost)
+    >>> assert fetch_thing(outermost, 'foo', 'bar', 'bat') == {'name': 'bat', 't': 1}
+    """
+    sub = jdoc
+    for name in names:
+        for thing in sub['item']:
+            if thing['name'] == name:
+                sub = thing
+                break     # the first thing with that name
+    return sub
+
+
+# solid
+# OK.  Successfully decoded all bodies in OSDU.
+def decode_body(body):
+    bm = body['mode']
+    assert bm in ['raw', 'urlencoded', 'file']
+    br = body[bm]
+    if (type(br) is not str) or (not br):
+        return br
+    return json.loads(br)
+
+
+# OK
+# Now we can
+# 1. Recursively iterate over all things.
+# 2. Fetch arbitrary, deeply nested things.
+# TODO: 
+# - run individual request.
+# - run a sequence of requests.
+# - cleanup the jdoc by removing empty things.
+# - add and subtract things.
+
+
+# Questionable usefulness below
+# ########################################################################## #
+
+# used once.
+def write_data():
+    # TODO: write petstore to yaml.
+    # !!!!!!!!!! WARNING !!!!!!!!!!
+    # Use great caution when writing yaml because it can come out quite garbled.
+    # All info will be there but with references not very readable.
+#    from pyapix.test_data import petstore
+    import yaml
+    globals().update(locals())
+    fname = 'petstore_dataX.yaml'
+    data = petstore.__dict__
+    for key in dubs:
+        data.pop(key)
+    with open (fname, 'w') as fh:
+        yaml.dump(data, fh)
+
+# not used
+@lru_cache
+def postman_schema():
+    # all postman schemas == v1.0.0  v2.0.0  v2.1.0
+    # OSDU Preshipping postman files have this...
+    'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
+    # for schema.  But that link is   301 Permanently moved.
+    postman_schema = 'https://schema.postman.com/collection/json/v2.1.0/draft-07/collection.json'
+    return parsed_file_or_url(postman_schema)
+
+
+# TODO: is this needed?
 def decode_url(url):
   try:
     """For working with Postman.
@@ -350,77 +394,59 @@ def test_decode_url():
     globals().update(locals())
 
 
-def insert_params(template, parameters):
-    """
-    >>> url = '{{base_url}}/api/search/v2/query'
-    >>> ps = dict(base_url='xxxxxxxx')
-    >>> x = insert_params(url, ps)
-    >>> assert x == 'xxxxxxxx/api/search/v2/query'
+def exp_with_postman_schema():
+    pm_schema = parsed_file_or_url('~/local/postman/2.1.0.json')
+    request_schema = pm_schema['definitions']['request']
+    pm_defs = pm_schema['definitions']
+    ['$schema', '$id', 'title', 'description', 'oneOf']
+    ['url', 'auth', 'proxy', 'certificate', 'method', 'description', 'header', 'body']
 
-    >>> template = 'xyz {{abc}} wvp'
-    >>> abc = 'xxxxxxxx'
-    >>> x = insert_params(template, locals())
-    >>> assert x == 'xyz xxxxxxxx wvp'
-    """
-    #def templatified(s): return s.replace('{', '{{').replace('}', '}}')
-    from jinja2 import select_autoescape 
-    from jinja2 import Environment as j2Environment
-    env = j2Environment(autoescape=select_autoescape())
-    return env.from_string(template).render(**parameters)
+    script_schema = pm_schema['definitions']['script']
+    ['$schema', '$id', 'title', 'type', 'description', 'properties']
+    ['id', 'type', 'exec', 'src', 'name']
 
 
-class Environment:
-    """A hierarchy of environments, ala Postman.
-    >>> environment = Environment()
-    >>> assert 'k' not in environment.general
-    >>> assert 'k' not in environment.current
-    >>> environment.request['k'] = 'v'
-    >>> assert 'k' not in environment.general
-    >>> assert environment.current['k'] == 'v'
-    >>> environment.reset()
-    >>> assert environment.current == {}
-    >>> assert environment.request == {}
-    """
-    def __init__(self):
-        self._current = {}
-        self.general = {}
-        self.collection = {}
-        self.sequence = {}
-        self.request = {}
+def exp_with_TypedDict():
+    Point2D = TypedDict('Point2D', {'in': int, 'x-y': int})
+    # TODO: NOTE
+    # This is interesting.  Keys that are keywords or contain '-'.
+    # Could be useful when we want to use keys like 
+    # /zones/:type/:zoneId
+    Point2D = TypedDict('Point2D', {'/zones/:type/:zoneId': int, 'x-y': int})
 
-    def update(self):
-        for source in [self.general, self.collection, self.sequence, self.request]:
-            self._current.update(source)
-#        globals().update(self._current)    # ?
-
-    @property
-    def current(self):
-        self.update()
-        return self._current
-
-    def reset(self):
-        self.general = {}
-        self.collection = {}
-        self.sequence = {}
-        self.request = {}
-        self._current = {}
+    p2 = Point2D( {'z': 3, 'label': 'bad'})
+    p2 = Point2D(t= 3, label= 'bad')
 
 
-def test_environment_update():
-    environment = Environment()
-    assert environment.current == {}
-    things = [
-        (environment.general, None),
-        (environment.collection, 2),
-        (environment.sequence, 22),
-        (environment.request, 222),
-    ]
-    for (thing, value) in things:
-        thing['foo'] = value
-    assert 'foo' in environment.current
-    assert environment.current['foo'] == environment.request['foo']
-    for (thing, value) in things:
-        assert thing['foo'] == value
-    environment.reset()
-    assert environment.current == {}
+class Request(TypedDict, total=True):
+    header: Required[dict]
+    body: typing.Dict  = None
+    description: str  = None
+    method: str     # enum
+    url: str     # matching a regex
+
+class MyParameters(TypedDict, total=True):
+    header: NotRequired[dict]
+    body: NotRequired[dict]
+    query: NotRequired[dict]
+    args: NotRequired[dict] = {}
+ 
+class MyRequest(TypedDict, total=True):
+    endpoint: str     # matching a regex
+    method: str     # enum
+    parameters: MyParameters = None
+    post_test:  typing.Callable   = lambda _:None
+    # TODO?: auth: dict  # or such?
+
+# MyRequest and MyParameters can be used together to create a Request object.
+# That will be the mapping between my stuff and Postman schema.
+
+mr = MyRequest()
+mr = MyRequest(ep=1)
+mr = MyRequest(endpoint=1, method='have', parameters={})
+
+rt = Request()
+rt = Request(x=2)
+rt = Request(header=2, url='u', method='m')
+
 

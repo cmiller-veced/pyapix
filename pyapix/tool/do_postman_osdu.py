@@ -1,9 +1,7 @@
 import os
 from pyapix.tool.tools import parsed_file_or_url
 from pyapix.tool import working_with_postman as wp
-from pyapix.tool.working_with_postman import (
-    is_request, fetch_thing, 
-    )
+from pyapix.tool.working_with_postman import ( is_request, )
 
 
 version_format = """
@@ -43,6 +41,8 @@ def pm_files():
     return paths
 
 
+# TODO: OSDU events are largely low value, super-basic tests.
+# Like the ones above.  Not worth pulling automatically.
 def do_event(thing):
   try:
     event = thing['event']
@@ -73,44 +73,10 @@ def do_event(thing):
     globals().update(locals())
 
 
-def test_fetch_thing():
-  try:
-    jdoc = parsed_file_or_url(pm_files()[0])
-    rname = jdoc['item'][-4]['item'][-1]['item'][-1]['name']
-    assert rname == '6c. Download file 3 from S3'
-    # How to pull a particular thing of interest by name?
-    n1 = jdoc['item'][-4]['name']
-    n2 = jdoc['item'][-4]['item'][-1]['name']
-    n3 = jdoc['item'][-4]['item'][-1]['item'][-1]['name']
-    assert n3 == rname
-    names = [
-        'Dataset',
-        'dataset-FileCollection.generic',
-        '6c. Download file 3 from S3',
-        ]
-    n1, n2, n3 = names
-
-    assert fetch_thing(jdoc) == jdoc
-    r1 = fetch_thing(jdoc, 'Aggregate-WPC')            # request
-    i1 = fetch_thing(jdoc, n1)                         # item
-    i2 = fetch_thing(jdoc, n1, n2)                     # item
-    r2 = fetch_thing(jdoc, n1, n2, n3)                 # request
-    assert is_request(r1)
-    assert is_request(r2)
-    assert not is_request(i1)
-    assert not is_request(i2)
-    assert i1['name'] == n1
-    assert i2['name'] == n2
-    assert r2['name'] == n3
-    tx = fetch_thing(jdoc, *names)
-    assert tx == r2
-    tx_auth = tx['request']['auth']        #['']
-  finally:
-    globals().update(locals())
-
-
 from pyapix.tool.exploratory import pop_key
 
+# TODO: this simply removes things for readability.
+# Thus is exploratory.
 @pop_key('event')
 @pop_key('response')
 def strip_it(req):
@@ -119,6 +85,7 @@ def strip_it(req):
     return req
 
 
+# TODO: this is hard-coded to crs{catalog,conversion} services.
 def good_one(req):
     try:
         return req['request']['url']['path'][1] == 'crs'
@@ -129,6 +96,8 @@ def good_one(req):
 def all_requests(pm_files):
     wp.check_do_item(pm_files)
     return wp.all_requests 
+    # TODO: this is a bad way to return the value !!!!!!!!!!!!!
+    # real bad !!!!!!
 
 
 def filtered_list(lst, good_one):
@@ -137,6 +106,8 @@ def filtered_list(lst, good_one):
 
 # ########################################################################## # 
 
+# TODO: this is NOT needed.  See crs_catalog client.
+# but do not rush to delete.
 def decode_query(reqs):
     svs = set()
     for req in reqs:
@@ -181,6 +152,8 @@ ars = [strip_it(r) for r in all_requests(pm_files)]
 #                                              I will have to make a client for
 #                                              another service.
 #                                              crs/catalog has some
+# create client for crs/catalog                DONE
+#     validate the parameters                  DONE
+#
 # store the parameters in yaml?
-
 

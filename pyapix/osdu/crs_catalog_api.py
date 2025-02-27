@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pyapix.tool import api_tools
 from pyapix.tool.api_tools import (dynamic_validator, dynamic_call, SurpriseArgs)
-from pyapix.tool.api_tools import *
+#from pyapix.tool.api_tools import *
 from pyapix.tool.tools import (LocalValidationError, ValidDataBadResponse, )
 from pyapix.client.info import local
 
@@ -33,13 +33,36 @@ call = dynamic_call(config)
 
 # end of the API client
 # ############################################################################
+import json
 
-from pyapix.tool.tools import parsed_file_or_url
+from pyapix.tool.tools import parsed_file_or_url, list_of_dict_to_dict
+from pyapix.tool.api_tools import endpoints_ands_verbs
+
 from pyapix.tool.working_with_postman import fetch_thing, insert_params
 from pyapix.tool.do_postman_osdu import pm_files
-from pyapix.tool import do_postman_osdu
-from pyapix.tool.api_tools import endpoints_ands_verbs
-from pyapix.tool.tools import list_of_dict_to_dict
+
+# TODO: mv to do_postman_osdu
+def is_version(word):
+    """
+    >>> assert is_version('v3') is True
+    >>> assert is_version('v222') is True
+    >>> assert is_version('V222') is True
+    >>> assert is_version('vx2') is False
+    """
+    if word[0].lower() == 'v' and word[1:].isdigit():
+        return True
+    return False
+
+
+# TODO: mv to do_postman_osdu?    YES
+def is_bad_schema(schema):
+    if schema == { 'required': [], 'properties': {},
+     'additionalProperties': False, 'type': 'object'}:
+        return True
+    if schema['properties'] == {} and schema['additionalProperties'] == False:
+        return True
+    return False
+
 
 one_dict = list_of_dict_to_dict()
 
@@ -70,27 +93,6 @@ def test_inspect_swagger():
     # TODO: leverage examples  in definitions.
   finally:
     globals().update(locals())
-
-
-def is_version(word):
-    """
-    >>> assert is_version('v3') is True
-    >>> assert is_version('v222') is True
-    >>> assert is_version('V222') is True
-    >>> assert is_version('vx2') is False
-    """
-    if word[0].lower() == 'v' and word[1:].isdigit():
-        return True
-    return False
-
-
-def is_bad_schema(schema):
-    if schema == { 'required': [], 'properties': {},
-     'additionalProperties': False, 'type': 'object'}:
-        return True
-    if schema['properties'] == {} and schema['additionalProperties'] == False:
-        return True
-    return False
 
 
 def test_crs_catalog():
