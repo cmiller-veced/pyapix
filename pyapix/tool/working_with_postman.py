@@ -311,7 +311,6 @@ def write_data():
     # All info will be there but with references not very readable.
 #    from pyapix.test_data import petstore
     import yaml
-    globals().update(locals())
     fname = 'petstore_dataX.yaml'
     data = petstore.__dict__
     for key in dubs:
@@ -332,7 +331,6 @@ def postman_schema():
 
 # TODO: is this needed?
 def decode_url(url):
-  try:
     """For working with Postman.
     But should be much more general.
     """
@@ -345,8 +343,6 @@ def decode_url(url):
     query_params = dict(x.split('=') for x in parts)
     front = fix_colon_prefix(front)
     return (front, query_params)
-  finally:
-    globals().update(locals())
 
 
 def test_decode_url():

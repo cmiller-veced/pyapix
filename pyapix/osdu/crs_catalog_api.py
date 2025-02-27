@@ -100,9 +100,11 @@ def test_crs_catalog():
     pmjdoc = parsed_file_or_url(pm_files()[0])
     assert fetch_thing(pmjdoc) == pmjdoc
 
+    # Fetch CRS Catalog section.
     names = ['Core Services', 'CRS Catalog', 'V3']
     ct = fetch_thing(pmjdoc, *names)
 
+    # Find the names of subsections / requests.
     rnames = [thing['name'] for thing in ct['item']]
     assert rnames == [
         'Search Coordinate Transformation', 
@@ -113,6 +115,7 @@ def test_crs_catalog():
         'Coordinate Reference System', 
         'Check area of use']
 
+    # Iterate over the requests.
     for name in rnames:
         noms = names + [name]
         ct = fetch_thing(pmjdoc, *noms)
@@ -128,7 +131,7 @@ def test_crs_catalog():
         else:
             bdecoded = ''
 
-        # TODO: get endpoint            DONE
+        # TODO: get (endpoint, verb)            DONE
         up = url['path']
         for i, word in enumerate(up):
             if is_version(word):
@@ -136,15 +139,14 @@ def test_crs_catalog():
                 endpoint = '/' + '/'.join(up[i+1:])
         verb = method.lower()
 
-        v = _validator(endpoint, verb)
-        schema = v.v.schema   # in case we want to have a look.
-
         # TODO:  insert template variables...     DONE
         dpi = one_dict(ctr['header'])['data-partition-id']
         source = dict(data_partition_id='foo..dpi..bar')
         subbed = insert_params(dpi, source)
 
         # TODO: validate postman data   DONE
+        v = _validator(endpoint, verb)
+        schema = v.v.schema   # in case we want to have a look.
         params = one_dict(url['query']) if 'query' in url else {}
         if bdecoded:
             params['body'] = bdecoded

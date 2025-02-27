@@ -2,6 +2,7 @@ import os
 from pyapix.tool.tools import parsed_file_or_url
 from pyapix.tool import working_with_postman as wp
 from pyapix.tool.working_with_postman import ( is_request, )
+from pyapix.tool.exploratory import pop_key
 
 
 version_format = """
@@ -73,7 +74,6 @@ def do_event(thing):
     globals().update(locals())
 
 
-from pyapix.tool.exploratory import pop_key
 
 # TODO: this simply removes things for readability.
 # Thus is exploratory.
