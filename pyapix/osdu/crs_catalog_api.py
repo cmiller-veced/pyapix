@@ -98,6 +98,7 @@ def test_inspect_swagger():
 #    globals().update(locals())
 
 
+#def request_for_service(eps):   # TODO: later change to the actual service.
 # TODO: enclose in outer function per service.
 def do_pm_request(postman_request):
   try:
@@ -126,21 +127,24 @@ def do_pm_request(postman_request):
     source = dict(data_partition_id='foo..dpi..bar')
     subbed = insert_params(dpid, source)
 
-    # TODO: validate postman data   DONE
-    v = _validator(endpoint, verb)
-    # TODO: 
-    # this _validator is hard-coded to CRS Catalog.
-    # Do it for arbitrary OSDU service.
-    schema = v.v.schema   # in case we want to have a look.
+    # get params
     params = one_dict(url['query']) if 'query' in url else {}
     if bdecoded:
         params['body'] = bdecoded
-    valid_params = 'OK' if v.is_valid(params) else 'invalid params'
-    if is_bad_schema(schema):
-        valid_params = 'crap schema'
-        assert endpoint, verb == ('/coordinate-reference-system', 'get')
-        # TODO: this (endpoint, verb) has no useful schema.
-        # What to do about it?
+    valid_params = '???'
+
+#     # TODO: validate postman data   DONE
+#     v = _validator(endpoint, verb)
+#     # TODO: this _validator is hard-coded to CRS Catalog.
+#     # Do it for arbitrary OSDU service.
+#     schema = v.v.schema   # in case we want to have a look.
+# 
+#     valid_params = 'OK' if v.is_valid(params) else 'invalid params'
+#     if is_bad_schema(schema):
+#         valid_params = 'crap schema'
+#         assert endpoint, verb == ('/coordinate-reference-system', 'get')
+#         # TODO: this (endpoint, verb) has no useful schema.
+#         # What to do about it?
 
     print(postman_request['name'])
     print(endpoint, verb)
@@ -168,22 +172,52 @@ def show_contents(pmjdoc, *names):
         indent = space * i
     if 'item' in pm_item:
         for dct in pm_item['item']:
-            print(f"{indent}{dct['name']}")
+            t = 'r' if 'request' in dct else 'i' 
+            print(f"{indent}{t} {dct['name']}")
 
 
 import crs_conversion_api
-crs_conversion_api.ends
-crs_conversion_api._validator
+#ends = crs_conversion_api.ends
+_validator = crs_conversion_api._validator
+# TODO: the different service parts here:  ends, _validator, call
+# are associated with the names below.
+# Every list of names is associated with a service.  Not 1:1
+# 1:N  service:names
+
+
+"""
+>>> ebnames = ['Core Services', 'CRS Catalog', 'Entitlements']
+TODO:  weird things happen with this input.  fix.
+>>> show_contents(pmjdoc, *ebnames)
+Core Services
+    CRS Catalog
+        Entitlements
+            i V3
+            r Health Check
+>>> show_contents(pmjdoc, 'Core Services', 'CRS Catalog')
+Core Services
+    CRS Catalog
+        i V3
+        r Health Check
+"""
+
+enames = ['Core Services', 'Entitlements']   # good output
+# show_contents(pmjdoc, *enames)   # good output
+
+cat_names = ['Core Services', 'CRS Catalog', 'V3']
+con_names = ['Core Services', 'CRS Conversion', 'V3', 'v3', 'convertTrajectory']
 
 
 def test_crs_catalog():
     global pmjdoc
     pmjdoc = parsed_file_or_url(pm_files()[0])
-    names = ['Core Services', 'CRS Conversion', 'V3', 'v3']
-    names = ['Core Services', 'CRS Conversion', 'V3', 'v3', 'convert']
-    names = ['Core Services', 'CRS Conversion', 'V3', 'v3', 'convertTrajectory']
-    names = ['Core Services', 'CRS Catalog', 'Entitlements']
+
     names = ['Core Services', 'CRS Catalog', 'V3']
+
+    names = ['Core Services', 'CRS Conversion', 'V3', 'v3', 'convertTrajectory']
+    names = ['Core Services', 'CRS Conversion', 'V3', 'v3', 'convert']
+    # TODO: names[1] maps to the service.
+
     test_pm_section(pmjdoc, *names)
 
 
@@ -194,6 +228,8 @@ def test_pm_section(pmjdoc, *names):
     # TODO: associate section of Postman file with an API client.
     # So far I have two.
     #
+    # TODO: and figure out how to deal with the irritating problem of version
+    # prefixed to the url for SOME services.
     """
     postman_item = fetch_thing(pmjdoc, *names)
     rnames = [thing['name'] for thing in postman_item['item']]
@@ -202,6 +238,5 @@ def test_pm_section(pmjdoc, *names):
         rf = do_pm_request(fetch_thing(pmjdoc, *noms))
   finally:
     globals().update(locals())
-
 
 
