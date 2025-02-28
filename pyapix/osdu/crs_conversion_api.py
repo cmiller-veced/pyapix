@@ -43,6 +43,8 @@ class config:
     validate = local_validate
 
 
+from pyapix.tool.api_tools import endpoints_ands_verbs
+ends = endpoints_ands_verbs(parsed_file_or_url(config.swagger_path))
 _validator = dynamic_validator(config)
 call = dynamic_call(config)
 
@@ -54,7 +56,6 @@ from pyapix.tool.tools import parsed_file_or_url
 from pyapix.tool.working_with_postman import fetch_thing, insert_params
 from pyapix.tool.do_postman_osdu import pm_files
 from pyapix.tool import do_postman_osdu
-from pyapix.tool.api_tools import endpoints_ands_verbs
 
 
 # Fill in some missing functionality in api_tools.

@@ -27,6 +27,9 @@ class config:
     validate = local_validate
 
 
+from pyapix.tool.tools import parsed_file_or_url, list_of_dict_to_dict
+from pyapix.tool.api_tools import endpoints_ands_verbs
+ends = endpoints_ands_verbs(parsed_file_or_url(config.swagger_path))
 _validator = dynamic_validator(config)
 call = dynamic_call(config)
 
@@ -35,8 +38,7 @@ call = dynamic_call(config)
 # ############################################################################
 import json
 
-from pyapix.tool.tools import parsed_file_or_url, list_of_dict_to_dict
-from pyapix.tool.api_tools import endpoints_ands_verbs
+
 
 from pyapix.tool.working_with_postman import fetch_thing, insert_params
 from pyapix.tool.do_postman_osdu import pm_files
@@ -92,74 +94,114 @@ def test_inspect_swagger():
     
     # TODO: leverage examples  in definitions.
   finally:
+    pass
+#    globals().update(locals())
+
+
+# TODO: enclose in outer function per service.
+def do_pm_request(postman_request):
+  try:
+    pr = postman_request['request']
+    method = pr['method']
+    url = pr['url']
+
+    if 'body' in pr:
+        ctrb = pr['body']
+#        assert sorted(list(ctrb)) == ['mode', 'options', 'raw']
+        if ctrb['mode'] == 'raw':
+            bdecoded = json.loads(ctrb['raw'])
+    else:
+        bdecoded = ''
+
+    # TODO: get (endpoint, verb)            DONE
+    up = url['path']
+    for i, word in enumerate(up):
+        if is_version(word):
+            svc = up[:i+1]
+            endpoint = '/' + '/'.join(up[i+1:])
+    verb = method.lower()
+
+    # TODO:  insert template variables...     DONE
+    dpid = one_dict(pr['header'])['data-partition-id']
+    source = dict(data_partition_id='foo..dpi..bar')
+    subbed = insert_params(dpid, source)
+
+    # TODO: validate postman data   DONE
+    v = _validator(endpoint, verb)
+    # TODO: 
+    # this _validator is hard-coded to CRS Catalog.
+    # Do it for arbitrary OSDU service.
+    schema = v.v.schema   # in case we want to have a look.
+    params = one_dict(url['query']) if 'query' in url else {}
+    if bdecoded:
+        params['body'] = bdecoded
+    valid_params = 'OK' if v.is_valid(params) else 'invalid params'
+    if is_bad_schema(schema):
+        valid_params = 'crap schema'
+        assert endpoint, verb == ('/coordinate-reference-system', 'get')
+        # TODO: this (endpoint, verb) has no useful schema.
+        # What to do about it?
+
+    print(postman_request['name'])
+    print(endpoint, verb)
+    print('params', params)
+    print('............', valid_params)
+    print()
+  finally:
     globals().update(locals())
+
+
+def show_contents(pmjdoc, *names):
+    """
+    show_contents(pmjdoc)
+    show_contents(pmjdoc, 'Core Services')
+    show_contents(pmjdoc, 'Core Services', 'Entitlements')
+    show_contents(pmjdoc, 'Core Services', 'CRS Catalog', 'V3')
+    """
+    pm_item = fetch_thing(pmjdoc, *names)
+    space = ' '
+    i = 0
+    indent = space * i
+    for name in names:
+        print(f'{indent}{name}')
+        i += 4
+        indent = space * i
+    if 'item' in pm_item:
+        for dct in pm_item['item']:
+            print(f"{indent}{dct['name']}")
+
+
+import crs_conversion_api
+crs_conversion_api.ends
+crs_conversion_api._validator
 
 
 def test_crs_catalog():
-  try:
+    global pmjdoc
     pmjdoc = parsed_file_or_url(pm_files()[0])
-    assert fetch_thing(pmjdoc) == pmjdoc
-
-    # Fetch CRS Catalog section.
+    names = ['Core Services', 'CRS Conversion', 'V3', 'v3']
+    names = ['Core Services', 'CRS Conversion', 'V3', 'v3', 'convert']
+    names = ['Core Services', 'CRS Conversion', 'V3', 'v3', 'convertTrajectory']
+    names = ['Core Services', 'CRS Catalog', 'Entitlements']
     names = ['Core Services', 'CRS Catalog', 'V3']
-    ct = fetch_thing(pmjdoc, *names)
+    test_pm_section(pmjdoc, *names)
 
-    # Find the names of subsections / requests.
-    rnames = [thing['name'] for thing in ct['item']]
-    assert rnames == [
-        'Search Coordinate Transformation', 
-        'Search Coordinate Transformation 2', 
-        'Search Coordinate Transformation 3', 
-        'V3 Get coordinate transformations', 
-        'Search Coordinate Reference Systems', 
-        'Coordinate Reference System', 
-        'Check area of use']
 
-    # Iterate over the requests.
+def test_pm_section(pmjdoc, *names):
+  try:
+    """
+    Grab arbitrary section from Postman file and do the PM requests.
+    # TODO: associate section of Postman file with an API client.
+    # So far I have two.
+    #
+    """
+    postman_item = fetch_thing(pmjdoc, *names)
+    rnames = [thing['name'] for thing in postman_item['item']]
     for name in rnames:
-        noms = names + [name]
-        ct = fetch_thing(pmjdoc, *noms)
-        ctr = ct['request']
-        method = ctr['method']
-        url = ctr['url']
-
-        if 'body' in ctr:
-            ctrb = ctr['body']
-            assert sorted(list(ctrb)) == ['mode', 'options', 'raw']
-            if ctrb['mode'] == 'raw':
-                bdecoded = json.loads(ctrb['raw'])
-        else:
-            bdecoded = ''
-
-        # TODO: get (endpoint, verb)            DONE
-        up = url['path']
-        for i, word in enumerate(up):
-            if is_version(word):
-                svc = up[:i+1]
-                endpoint = '/' + '/'.join(up[i+1:])
-        verb = method.lower()
-
-        # TODO:  insert template variables...     DONE
-        dpi = one_dict(ctr['header'])['data-partition-id']
-        source = dict(data_partition_id='foo..dpi..bar')
-        subbed = insert_params(dpi, source)
-
-        # TODO: validate postman data   DONE
-        v = _validator(endpoint, verb)
-        schema = v.v.schema   # in case we want to have a look.
-        params = one_dict(url['query']) if 'query' in url else {}
-        if bdecoded:
-            params['body'] = bdecoded
-        isvalid = v.is_valid(params)
-        if is_bad_schema(schema):
-            isvalid = 'crap schema'
-            assert endpoint, verb == ('/coordinate-reference-system', 'get')
-
-        print(name)
-        print(endpoint, verb)
-        print('params', params)
-        print('............', isvalid)
-        print()
+        noms = names + (name,)
+        rf = do_pm_request(fetch_thing(pmjdoc, *noms))
   finally:
     globals().update(locals())
+
+
 
