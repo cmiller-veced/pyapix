@@ -98,61 +98,72 @@ def test_inspect_swagger():
 #    globals().update(locals())
 
 
-#def request_for_service(eps):   # TODO: later change to the actual service.
 # TODO: enclose in outer function per service.
-def do_pm_request(postman_request):
-  try:
-    pr = postman_request['request']
-    method = pr['method']
-    url = pr['url']
 
-    if 'body' in pr:
-        ctrb = pr['body']
-#        assert sorted(list(ctrb)) == ['mode', 'options', 'raw']
-        if ctrb['mode'] == 'raw':
-            bdecoded = json.loads(ctrb['raw'])
-    else:
-        bdecoded = ''
+def request_for_service(service):
+    def do_pm_request(postman_request):
+      try:
+        pr = postman_request['request']
+        method = pr['method']
+        url = pr['url']
 
-    # TODO: get (endpoint, verb)            DONE
-    up = url['path']
-    for i, word in enumerate(up):
-        if is_version(word):
-            svc = up[:i+1]
-            endpoint = '/' + '/'.join(up[i+1:])
-    verb = method.lower()
+        if 'body' in pr:
+            ctrb = pr['body']
+    #        assert sorted(list(ctrb)) == ['mode', 'options', 'raw']
+            if ctrb['mode'] == 'raw':
+                bdecoded = json.loads(ctrb['raw'])
+        else:
+            bdecoded = ''
 
-    # TODO:  insert template variables...     DONE
-    dpid = one_dict(pr['header'])['data-partition-id']
-    source = dict(data_partition_id='foo..dpi..bar')
-    subbed = insert_params(dpid, source)
+        # get (endpoint, verb)
+        eps = [e for (e,v) in service.ends]   # all endpoints for swagger
+        up = url['path']
+        for i, word in enumerate(up):
+            if is_version(word):
+                svc = up[:i+1]
+                endpoint = '/' + '/'.join(up[i+1:])
+                # check here to see if swagger endpoint contains version or not.
+                # Include the version if it is in the swagger file.
+                if endpoint not in eps:
+                    # TODO: do something.
+                    for e in eps:
+                        if e.endswith(endpoint):
+                            endpoint = e
+            # TODO: above is good but has grow enough to warrant a function.
+        verb = method.lower()
 
-    # get params
-    params = one_dict(url['query']) if 'query' in url else {}
-    if bdecoded:
-        params['body'] = bdecoded
-    valid_params = '???'
+        # TODO:  insert template variables...     DONE
+        dpid = one_dict(pr['header'])['data-partition-id']
+        source = dict(data_partition_id='foo..dpi..bar')
+        subbed = insert_params(dpid, source)
 
-#     # TODO: validate postman data   DONE
-#     v = _validator(endpoint, verb)
-#     # TODO: this _validator is hard-coded to CRS Catalog.
-#     # Do it for arbitrary OSDU service.
-#     schema = v.v.schema   # in case we want to have a look.
-# 
-#     valid_params = 'OK' if v.is_valid(params) else 'invalid params'
-#     if is_bad_schema(schema):
-#         valid_params = 'crap schema'
-#         assert endpoint, verb == ('/coordinate-reference-system', 'get')
-#         # TODO: this (endpoint, verb) has no useful schema.
-#         # What to do about it?
+        # get params
+        params = one_dict(url['query']) if 'query' in url else {}
+        if bdecoded:
+            params['body'] = bdecoded
+        valid_params = '???'
 
-    print(postman_request['name'])
-    print(endpoint, verb)
-    print('params', params)
-    print('............', valid_params)
-    print()
-  finally:
-    globals().update(locals())
+    #     # TODO: validate postman data   DONE
+    #     v = service._validator(endpoint, verb)
+    #     # TODO: this _validator is hard-coded to CRS Catalog.
+    #     # Do it for arbitrary OSDU service.
+    #     schema = v.v.schema   # in case we want to have a look.
+    # 
+    #     valid_params = 'OK' if v.is_valid(params) else 'invalid params'
+    #     if is_bad_schema(schema):
+    #         valid_params = 'crap schema'
+    #         assert endpoint, verb == ('/coordinate-reference-system', 'get')
+    #         # TODO: this (endpoint, verb) has no useful schema.
+    #         # What to do about it?
+
+        print(postman_request['name'])
+        print(endpoint, verb)
+        print('params', params)
+        print('............', valid_params)
+        print()
+      finally:
+        globals().update(locals())
+    return do_pm_request
 
 
 def show_contents(pmjdoc, *names):
@@ -176,13 +187,23 @@ def show_contents(pmjdoc, *names):
             print(f"{indent}{t} {dct['name']}")
 
 
-import crs_conversion_api
-#ends = crs_conversion_api.ends
-_validator = crs_conversion_api._validator
-# TODO: the different service parts here:  ends, _validator, call
-# are associated with the names below.
+import crs_conversion_api as con
+# the different services are associated with the names below.
 # Every list of names is associated with a service.  Not 1:1
 # 1:N  service:names
+
+class Service:
+    def __init__(self, call, _validator, ends):
+        self.call = call
+        self._validator = _validator
+        self.ends = ends
+
+cat_service = Service(call, _validator, ends)
+con_service = Service(con.call, con._validator, con.ends)
+smap = {
+    'CRS Catalog': cat_service,
+    'CRS Conversion': con_service,
+}
 
 
 """
@@ -212,11 +233,16 @@ def test_crs_catalog():
     global pmjdoc
     pmjdoc = parsed_file_or_url(pm_files()[0])
 
-    names = ['Core Services', 'CRS Catalog', 'V3']
 
     names = ['Core Services', 'CRS Conversion', 'V3', 'v3', 'convertTrajectory']
     names = ['Core Services', 'CRS Conversion', 'V3', 'v3', 'convert']
     # TODO: names[1] maps to the service.
+
+    names = ['Core Services', 'CRS Catalog', 'V3']
+    # Woooooohooooooo!!!!!!!!!!!
+    # Woooooohooooooo!!!!!!!!!!!
+    # Woooooohooooooo!!!!!!!!!!!
+    # Kicks ass !!!!!!!!!!!!!!!!
 
     test_pm_section(pmjdoc, *names)
 
@@ -233,10 +259,45 @@ def test_pm_section(pmjdoc, *names):
     """
     postman_item = fetch_thing(pmjdoc, *names)
     rnames = [thing['name'] for thing in postman_item['item']]
+    service = smap[names[1]]
+    do_pm_request = request_for_service(service)
+
     for name in rnames:
         noms = names + (name,)
         rf = do_pm_request(fetch_thing(pmjdoc, *noms))
   finally:
     globals().update(locals())
 
+
+"""
+
+The different services have inconsistent swagger files.
+
+>>> exec(open('crs_catalog_api.py').read());    test_crs_catalog()
+Convert a list of points
+/convert post
+params {'body': {'fromCRS': 'osdu:reference-data--CoordinateReferenceSystem:BoundProjected:EPSG::29193_EPSG::1867:', 'toCRS': 'osdu:reference-data--CoordinateReferenceSystem:Geographic2D:EPSG::4326:', 'points': [{'x': 697339.525, 'y': 7239989.403, 'z': 0}]}}
+............ ???
+
+>>> pprint(crs_conversion_api.ends)
+[('/v4/convertTrajectory', 'post'),
+ ('/v4/convert', 'post'),
+ ('/v4/convertGeoJson', 'post'),
+ ('/v4/info', 'get')]
+
+>>> pprint(ends)
+[('/coordinate-transformation', 'get'),
+ ('/coordinate-transformation', 'post'),
+ ('/coordinate-reference-system', 'get'),
+ ('/coordinate-reference-system', 'post'),
+ ('/points-in-aou', 'post'),
+ ('/info', 'get')]
+
+^^^^ These two groups come from the respective swagger files.
+We see some services include the version and others do not.
+
+# TODO: alter created endpoint to account for swagger diffs
+
+
+"""
 
