@@ -36,12 +36,13 @@ call = dynamic_call(config)
 
 # end of the API client
 # ############################################################################
+
 import json
-
-
 
 from pyapix.tool.working_with_postman import fetch_thing, insert_params
 from pyapix.tool.do_postman_osdu import pm_files
+import crs_conversion_api as con
+
 
 # TODO: mv to do_postman_osdu
 def is_version(word):
@@ -75,7 +76,6 @@ service_parts = ['api', 'crs', 'catalog', 'conversion', 'search', 'storage',
 # Fill in some missing functionality in tool.tools.
 
 def test_inspect_swagger():
-  try:
     """
     CRS Catalog
     Have a look at one of the endpoints from the swagger file.
@@ -91,14 +91,8 @@ def test_inspect_swagger():
     defs = jdoc['definitions']
     point = defs['Point']
     ps = defs['PointsInAOUSearch']
-    
     # TODO: leverage examples  in definitions.
-  finally:
-    pass
-#    globals().update(locals())
 
-
-# TODO: enclose in outer function per service.
 
 def request_for_service(service):
     def do_pm_request(postman_request):
@@ -187,10 +181,6 @@ def show_contents(pmjdoc, *names):
             print(f"{indent}{t} {dct['name']}")
 
 
-import crs_conversion_api as con
-# the different services are associated with the names below.
-# Every list of names is associated with a service.  Not 1:1
-# 1:N  service:names
 
 class Service:
     def __init__(self, call, _validator, ends):
@@ -198,35 +188,11 @@ class Service:
         self._validator = _validator
         self.ends = ends
 
-cat_service = Service(call, _validator, ends)
-con_service = Service(con.call, con._validator, con.ends)
 smap = {
-    'CRS Catalog': cat_service,
-    'CRS Conversion': con_service,
+    'CRS Catalog': Service(call, _validator, ends),
+    'CRS Conversion': Service(con.call, con._validator, con.ends),
 }
 
-
-"""
->>> ebnames = ['Core Services', 'CRS Catalog', 'Entitlements']
-TODO:  weird things happen with this input.  fix.
->>> show_contents(pmjdoc, *ebnames)
-Core Services
-    CRS Catalog
-        Entitlements
-            i V3
-            r Health Check
->>> show_contents(pmjdoc, 'Core Services', 'CRS Catalog')
-Core Services
-    CRS Catalog
-        i V3
-        r Health Check
-"""
-
-enames = ['Core Services', 'Entitlements']   # good output
-# show_contents(pmjdoc, *enames)   # good output
-
-cat_names = ['Core Services', 'CRS Catalog', 'V3']
-con_names = ['Core Services', 'CRS Conversion', 'V3', 'v3', 'convertTrajectory']
 
 
 def test_crs_catalog():
@@ -234,16 +200,15 @@ def test_crs_catalog():
     pmjdoc = parsed_file_or_url(pm_files()[0])
 
     names = ['Core Services', 'CRS Catalog', 'V3']
+    print(names[1])
+    test_pm_section(pmjdoc, *names)
+    print()
+    print('+'*77)
 
+    print()
+    print(names[1])
     names = ['Core Services', 'CRS Conversion', 'V3', 'v3', 'convertTrajectory']
     names = ['Core Services', 'CRS Conversion', 'V3', 'v3', 'convert']
-    # TODO: names[1] maps to the service.
-
-    # Woooooohooooooo!!!!!!!!!!!
-    # Woooooohooooooo!!!!!!!!!!!
-    # Woooooohooooooo!!!!!!!!!!!
-    # Kicks ass !!!!!!!!!!!!!!!!
-
     test_pm_section(pmjdoc, *names)
 
 
@@ -270,34 +235,21 @@ def test_pm_section(pmjdoc, *names):
 
 
 """
+enames = ['Core Services', 'Entitlements']   # good output
+# show_contents(pmjdoc, *enames)   # good output
 
-The different services have inconsistent swagger files.
-
->>> exec(open('crs_catalog_api.py').read());    test_crs_catalog()
-Convert a list of points
-/convert post
-params {'body': {'fromCRS': 'osdu:reference-data--CoordinateReferenceSystem:BoundProjected:EPSG::29193_EPSG::1867:', 'toCRS': 'osdu:reference-data--CoordinateReferenceSystem:Geographic2D:EPSG::4326:', 'points': [{'x': 697339.525, 'y': 7239989.403, 'z': 0}]}}
-............ ???
-
->>> pprint(crs_conversion_api.ends)
-[('/v4/convertTrajectory', 'post'),
- ('/v4/convert', 'post'),
- ('/v4/convertGeoJson', 'post'),
- ('/v4/info', 'get')]
-
->>> pprint(ends)
-[('/coordinate-transformation', 'get'),
- ('/coordinate-transformation', 'post'),
- ('/coordinate-reference-system', 'get'),
- ('/coordinate-reference-system', 'post'),
- ('/points-in-aou', 'post'),
- ('/info', 'get')]
-
-^^^^ These two groups come from the respective swagger files.
-We see some services include the version and others do not.
-
-# TODO: alter created endpoint to account for swagger diffs
-
-
+>>> ebnames = ['Core Services', 'CRS Catalog', 'Entitlements']
+TODO:  weird things happen with this input.  fix.
+>>> show_contents(pmjdoc, *ebnames)
+Core Services
+    CRS Catalog
+        Entitlements
+            i V3
+            r Health Check
+>>> show_contents(pmjdoc, 'Core Services', 'CRS Catalog')
+Core Services
+    CRS Catalog
+        i V3
+        r Health Check
 """
 
