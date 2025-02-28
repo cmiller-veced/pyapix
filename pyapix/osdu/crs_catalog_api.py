@@ -143,18 +143,18 @@ def request_for_service(service):
             params['body'] = bdecoded
         valid_params = '???'
 
-    #     # TODO: validate postman data   DONE
-    #     v = service._validator(endpoint, verb)
-    #     # TODO: this _validator is hard-coded to CRS Catalog.
-    #     # Do it for arbitrary OSDU service.
-    #     schema = v.v.schema   # in case we want to have a look.
-    # 
-    #     valid_params = 'OK' if v.is_valid(params) else 'invalid params'
-    #     if is_bad_schema(schema):
-    #         valid_params = 'crap schema'
-    #         assert endpoint, verb == ('/coordinate-reference-system', 'get')
-    #         # TODO: this (endpoint, verb) has no useful schema.
-    #         # What to do about it?
+        # TODO: validate postman data   DONE
+        v = service._validator(endpoint, verb)
+        # TODO: this _validator is hard-coded to CRS Catalog.
+        # Do it for arbitrary OSDU service.
+        schema = v.v.schema   # in case we want to have a look.
+
+        valid_params = 'OK' if v.is_valid(params) else 'invalid params'
+        if is_bad_schema(schema):
+            valid_params = 'crap schema'
+            assert endpoint, verb == ('/coordinate-reference-system', 'get')
+            # TODO: this (endpoint, verb) has no useful schema.
+            # What to do about it?
 
         print(postman_request['name'])
         print(endpoint, verb)
@@ -233,12 +233,12 @@ def test_crs_catalog():
     global pmjdoc
     pmjdoc = parsed_file_or_url(pm_files()[0])
 
+    names = ['Core Services', 'CRS Catalog', 'V3']
 
     names = ['Core Services', 'CRS Conversion', 'V3', 'v3', 'convertTrajectory']
     names = ['Core Services', 'CRS Conversion', 'V3', 'v3', 'convert']
     # TODO: names[1] maps to the service.
 
-    names = ['Core Services', 'CRS Catalog', 'V3']
     # Woooooohooooooo!!!!!!!!!!!
     # Woooooohooooooo!!!!!!!!!!!
     # Woooooohooooooo!!!!!!!!!!!
