@@ -29,7 +29,37 @@ class config:
     validate = local_validate
 
 
+from pyapix.tool.api_tools import Service
+
 ends = endpoints_ands_verbs(parsed_file_or_url(config.swagger_path))
 _validator = dynamic_validator(config)
 call = dynamic_call(config)
+service = Service(call, _validator, ends)
+
+
+# aaaaaaaaarg!
+# Seems impossible to delete this way.
+# The only way to delete a buncha stuff then is one at a time.
+#
+# Solution...
+# define service directly here.
+
+
+
+# import copy
+# #snapshot = copy.deepcopy(globals().items())
+# snapshot = list(globals())
+# to_delete = []
+# #for (name, thing) in snapshot:
+# for name in snapshot:
+#     if (name not in ['call', '_validator', 'ends']) and not name.startswith('__'):
+#         to_delete.append(name)
+# #for thing in to_delete: del thing
+# for name in globals():
+#     if (name not in ['call', '_validator', 'ends']) and not name.startswith('__'):
+#         try:
+#             del globals()[name]
+#         except RuntimeError:
+#             print(name)
+# 
 

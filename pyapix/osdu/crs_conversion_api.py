@@ -33,31 +33,3 @@ ends = endpoints_ands_verbs(parsed_file_or_url(config.swagger_path))
 _validator = dynamic_validator(config)
 call = dynamic_call(config)
 
-
-# end of the API client
-
-
-# TODO: 
-# iterate over Postman file.                    DONE
-# Find all calls to CRS Conversion.             DONE
-# For each call,                                DONE
-#     translate url(PM) to endpoint(pyapiX)     DONE
-#     grab the parameters                       DONE
-#     validate the parameters                   DONE
-# store the parameters in yaml?     
-# NOTE:  Lots of services in the current PM file
-# CRS Conversion    
-# CRS Catalog    
-# Unit
-# Search
-# Dataset
-# Storage
-# pws   whatever that is... workflow maybe
-# Register
-# Notification
-# Partition
-# Schema
-# Legal
-# Entitlements
-# Seismic DMS
-

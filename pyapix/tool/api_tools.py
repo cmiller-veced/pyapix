@@ -141,3 +141,12 @@ def prep_func(config):
         pass
     return prepped
 
+
+# TODO: mv  (to api_tools?)
+class Service:
+    def __init__(self, call, _validator, ends):
+        self.call = call
+        self._validator = _validator
+        self.ends = ends
+
+
