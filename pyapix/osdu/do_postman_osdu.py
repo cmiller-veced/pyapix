@@ -284,17 +284,19 @@ service_parts = ['api', 'crs', 'catalog', 'conversion', 'search', 'storage',
 
 
 import json
+from pyapix.tool.api_tools import Service
 import crs_conversion_api as con
 import crs_catalog_api as cat
 import entitlements_api as entitlements
 import legal_api as legal
-from pyapix.tool.api_tools import Service
+import unit_api as unit
 
 smap = {
     'CRS Catalog': Service(cat.call, cat._validator, cat.ends),
     'CRS Conversion': Service(con.call, con._validator, con.ends),
     'Entitlements': entitlements.service,
     'Legal': legal.service,
+    'Unit': unit.service,
 }
 
 
@@ -338,7 +340,17 @@ def test_pm_section(pmjdoc, *names):
     for name in rnames:
         noms = names + (name,)
         thing = fetch_thing(pmjdoc, *noms)
-        rf = do_pm_request(thing)
+        if is_request(thing):
+            print(noms)
+            rf = do_pm_request(thing)
+        else:    # it is an `item`.
+            print('# AHA!    brainwave!!! ')
+            print('# AHA!    brainwave!!! ')
+            print('We had expected a request but received an `item`.')
+            print('We had expected a request but received an `item`.')
+            print(noms)
+            print('doing the item... ')
+            test_pm_section(pmjdoc, *noms)
   finally:
     globals().update(locals())
 
@@ -358,6 +370,31 @@ def test_entitlements():
   try:
     pmjdoc = parsed_file_or_url(pm_files()[0])
     names = ['Core Services', 'Entitlements',]
+    print(names[1])
+    test_pm_section(pmjdoc, *names)
+    print()
+  finally:
+    globals().update(locals())
+
+
+def test_unit():
+  try:
+    """Unit service has a complex hierarchy of items & requests.
+    """
+    pmjdoc = parsed_file_or_url(pm_files()[0])
+    names = ['Core Services', 'Unit', 'v3', 'catalog']
+    names = ['Core Services', 'Unit', 'v3', 'conversion']
+    names = ['Core Services', 'Unit', 'v3', 'measurement']
+    names = ['Core Services', 'Unit', 'v3', 'unitsystem']
+
+    # TODO: this one has both `item`s and `request`s.
+    # Work out how to deal with that.
+    names = ['Core Services', 'Unit', 'v3', 'unit', 'getUnits']   # request
+
+    names = ['Core Services', 'Unit', 'v3', 'unit', 'unitsystem']
+    names = ['Core Services', 'Unit', 'v3', 'unit', 'measurement']
+    names = ['Core Services', 'Unit', 'v3', 'unit', 'measurement', 'preferred']
+    names = ['Core Services', 'Unit', 'v3', 'unit']    # has both
     print(names[1])
     test_pm_section(pmjdoc, *names)
     print()
