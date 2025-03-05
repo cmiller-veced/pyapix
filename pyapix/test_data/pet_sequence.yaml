@@ -1,0 +1,168 @@
+   
+# YAML has this thing called tags for specifying types.
+# !!str	str
+# !!seq	list
+# !!map	dict
+# !!python/tuple	tuple
+# !!python/dict	dict
+# Complex Python tags	
+# !!python/name:module.name	module.name
+# !!python/module:package.module	package.module
+# !!python/object:module.cls	module.cls instance
+# !!python/object/new:module.cls	module.cls instance
+# !!python/object/apply:module.f	value of f(...)
+#
+# https://pyyaml.org/wiki/PyYAMLDocumentation
+
+N: !!int &N
+  54321
+foo: *N
+
+
+pet_other_sequence:  !!seq
+  - endpoint:  /pet/findByStatus
+    verb: get
+    name: Search by status
+    args: {'status': 'available'}
+    post_test:
+      requires: []
+      code: |
+        def post_test(response):
+          assert response.is_success
+          rj = response.json()
+          assert type(rj) is list
+          assert len(rj) > 1
+          assert all(type(x) is dict for x in rj)
+          return 'ok'
+
+
+
+pt1: &post1 |
+  def post_test(response):
+      assert response.is_success
+      assert response.json() == {'id': N, 'photoUrls': [], 'tags': []}
+      return 'OK'
+
+
+pt2: &post2 |
+  def post_test(response):
+      assert response.is_success
+      assert response.json() == {'id': N, 'name': 'kittyX', 'photoUrls': [], 'tags': []}
+      return 'OK'
+
+pt_unknown: &post_unknown |
+  def post_test(response):
+      assert response.is_success
+      assert response.json() == {'code': 200, 'type': 'unknown', 'message': str(N)}
+      return 'OK'
+
+pt_kittyY: &post_kittyY |
+  def post_test(response):
+      assert response.is_success
+      assert response.json() == {'id': N, 'name': 'kittyY', 'photoUrls': [], 'tags': []}
+      return 'OK'
+
+pt_upload: &post_upload |
+  def post_test(response):
+      assert response.is_success
+      name = response.json()['message']
+      assert name == 'additionalMetadata: aaaaaaa\nFile uploaded to ./upload, 7 bytes'
+      return 'OK'
+
+pt_nf: &post_not_found |
+  def post_test(response):
+      assert not response.is_success
+      assert response.status_code == 404
+      assert response.json() == {'code': 1, 'type': 'error', 'message': 'Pet not found'}
+      return 'OK'
+
+
+pt_default: &post_default |
+  def post_test(response):
+      return 'default'
+ 
+
+pet_crud_sequence:  !!seq
+  - endpoint: !!str /pet
+    verb: post
+    name: 'Create a new pet:'
+    args:
+      id: *N
+    post_test: 
+      requires: [N, foo]
+      code: *post_default
+      #      code: *post1
+
+  - endpoint:  /pet/{petId}
+    verb: get
+    name: 'Verify create:'
+    args:
+      petId: *N
+    post_test:
+      requires: [N]
+      code: *post1
+
+  - endpoint: /pet
+    verb: put
+    name:  'Update pet:'
+    args: {'id': *N, 'name': 'kittyX'}
+    post_test: 
+      requires: [N]
+      code: *post2
+
+  - endpoint:  /pet/{petId}
+    verb: get
+    name: 'Verify update:'
+    args: {'petId': *N}
+    post_test: 
+      requires: [N]
+      code: *post2
+
+  - endpoint: /pet/{petId}
+    verb:  post
+    name: 'Update:'
+    args: {'petId': *N, 'name': 'kittyY'}
+    post_test: 
+      requires: [N]
+      code: *post_unknown
+
+  - endpoint: /pet/{petId}
+    verb: get
+    name: 'Verify update:'
+    args: {'petId': *N}
+    post_test: 
+      requires: [N]
+      code: *post_kittyY
+
+  - endpoint: /pet/{petId}/uploadImage
+    verb: post
+    name: 'Upload Image:'
+    args: {'petId': *N, 'additionalMetadata': 'aaaaaaa', 'file': 'foo.png'}
+    post_test: 
+      requires: []
+      code: *post_upload
+
+  - endpoint: /pet/{petId}
+    verb: get
+    name: 'Verify upload:'
+    args: {'petId': *N}
+    post_test: 
+      requires: [N]
+      code: *post_kittyY
+
+  - endpoint: /pet/{petId}
+    verb: delete
+    name: 'Delete:'
+    args: {'petId': *N}
+    post_test: 
+      requires: [N]
+      code: *post_unknown
+
+  - endpoint: /pet/{petId}
+    verb: get
+    name: 'Verify delete:'
+    args: {'petId': *N}
+    post_test: 
+      requires: []
+      code: *post_not_found
+

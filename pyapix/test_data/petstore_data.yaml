@@ -1,0 +1,289 @@
+
+good_status: &good_status
+  - [sold]
+  - [sold,  pending]
+
+status: &status
+    bad: []
+    good: *good_status
+
+
+good_tags: &good_tags
+  - tags: [ foo ]
+  - tags:
+    - foo
+    - bar
+
+tags: &tags
+    bad: []
+    good: *good_tags
+
+user: &user
+  bad: []
+  good:
+    - username: user1
+
+bad: &id001 ['', 0, foo]
+
+pet_post: &pet_post
+  bad: *id001
+  good:
+  - category: {}
+    id: 1234
+    name: fluff
+    photoUrls: []
+    status: available
+    tags: []
+  - category:
+      id: -97087948
+      name: incididunt cupidatat nostrud
+    id: 73291872
+    name: doggie
+    photoUrls:
+      - adipisicing
+      - non et
+    status: sold
+    tags:
+      - id: -41459971
+        name: ''
+      - id: -75303293
+        name: mollit
+
+
+pet_put: &pet_put
+  bad: *id001
+  good:
+  - name: buff
+    photoUrls: []
+  - name: buff
+    photoUrls: []
+    status: pending
+
+
+# UNREFERENCED
+# api_key: special-key
+# 
+# 
+# category:
+#   bad:
+#     - ''
+#     - 0
+#     - foo
+#   good:
+#     - {}
+#     - foo: bar
+# 
+# 
+# file:
+#   bad:
+#     - ''
+#     - 0
+#   good:
+#     - '1234'
+#     - foo
+# 
+# 
+# orderId:
+#   bad:
+#     - ''
+#     - 0
+#     - foo
+#   good:
+#     - ''
+#     - ''
+# 
+
+petId_delete: &petId_delete
+  bad: *id001
+  good:
+  - api_key: special-key
+    petId: 1234
+
+
+petId_get: &petId_get
+  bad: []
+  good:
+    - petId: 1234
+    - petId: 0
+    - petId: 58806647
+
+
+petId_post: &petId_post
+  bad:
+    - ''
+    - 0
+    - foo
+    - {}
+  good:
+  - name: fluff
+    petId: 1234
+    status: available
+
+
+# UNREFERENCED
+# petIds:
+#   bad:
+#     - x
+#     - ''
+#     - '0'
+#     - 0
+#   good:
+#     - 1234
+#     - '1234'
+# 
+# 
+# petName:
+#   bad:
+#     - ''
+#     - 0
+#     - []
+#   good:
+#     - fluff
+#     - x
+# 
+# 
+# photoUrls:
+#   bad:
+#     - ''
+#     - 0
+#     - foo
+#   good:
+#     - 
+#       - ''
+#       - []
+# 
+
+store_inventory: &store_inventory
+  bad: []
+  good: []
+
+
+store_order_delete: &store_order_delete
+  bad: []
+  good:
+    - orderId: 1
+    - orderId: 9
+
+
+store_order_get: &store_order_get
+  bad: []
+  good:
+    - orderId: 1
+    - orderId: 9
+
+
+store_order_post: &store_order_post
+  bad: *id001
+  good:
+    - {id: 4321, petId: 1234}
+    - {petId: 1234}
+    - {}
+
+# UNREFERENCED
+# user_delete:
+#   bad: [{}]
+#   good: [username: user1]
+# 
+# user_get:
+#   bad:
+#     - 0
+#   good:
+#     - user1
+#     - bar
+# 
+
+user_login_get: &user_login_get
+  bad:
+    - {}
+  good:
+    - password: xxxx
+      username: user1
+
+user_logout_get: &user_logout_get
+  bad: []
+  good: []
+
+user_post: &user_post
+  bad: *id001
+  good:
+  - id: 2314345670987
+    username: user2314345670987
+  - {}
+
+user_put: &user_put
+  bad: *id001
+  good:
+  - body: {}
+    username: user1
+
+user_with_array_post: &user_with_array_post
+  bad: *id001
+  good:
+  - - id: 1234
+      username: user1
+  - - {}
+
+N: &N
+  1234
+
+pet_upload_image: &pet_upload_image
+  bad: *id001
+  good:
+  - additionalMetadata: aaaaaaa
+    file: ffffff
+    petId: 1234
+  - petId: *N
+
+
+# Listing (endpoint, verb) pairs this way is good.
+# It shows almost all (endpoint, verb) on one screen.
+# This is better than inlining.
+test_parameters:
+  /pet:
+    post: *pet_post
+    put: *pet_put
+
+  /pet/findByStatus:
+    get: *status
+
+  /pet/findByTags:
+    get: *tags
+
+  /pet/{petId}:
+    delete: *petId_delete
+    get: *petId_get
+    post: *petId_post
+
+  /pet/{petId}/uploadImage:
+    post: *pet_upload_image
+
+  /store/inventory:
+    get: *store_inventory
+
+  /store/order:
+    post: *store_order_post
+
+  /store/order/{orderId}:
+    delete: *store_order_delete
+    get: *store_order_get
+
+  /user:
+    post: *user_post
+
+  /user/createWithArray:
+    post: *user_with_array_post
+
+  /user/createWithList:
+    post: *user_with_array_post
+
+  /user/login:
+    get: *user_login_get
+
+  /user/logout:
+    get: *user_logout_get
+
+  /user/{username}:
+    delete: *user
+    get: *user
+    put: *user_put
+

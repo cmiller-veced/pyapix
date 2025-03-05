@@ -1,0 +1,144 @@
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+#[end of output]
+
+
+# NOTE
+# All this ruff stuff copied from
+# https://github.com/astral-sh/ruff
+# also NOTE all of below is the default behavior.
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+# Assume Python 3.9
+#target-version = "py39"
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+
+[project]
+name = "pyapiX"
+#version = "2025.02.02"
+version = "2025.02.07"
+requires-python = ">= 3.11"
+dependencies = [
+  "httpx",
+  "anyio==4.6.2.post1",
+  "attrs==24.2.0",
+  "certifi==2024.8.30",
+  "exceptiongroup==1.2.2",
+  "h11==0.14.0",
+  "httpcore==1.0.6",
+  "httpx==0.27.2",
+  "idna==3.10",
+  "iniconfig==2.0.0",
+  "jsonref==1.1.0",
+  "jsonschema==4.23.0",
+  "jsonschema-specifications==2024.10.1",
+  "numpy==2.0.2",
+  "packaging==24.1",
+  "pandas==2.2.3",
+  "pluggy==1.5.0",
+  "pytest==8.3.3",
+  "python-dateutil==2.9.0.post0",
+  "pytz==2024.2",
+  "PyYAML==6.0.2",
+  "referencing==0.35.1",
+  "rpds-py==0.20.0",
+  "six==1.16.0",
+  "sniffio==1.3.1",
+  "tomli==2.0.2",
+  "typing_extensions==4.12.2",
+  "tzdata==2024.2",
+  "jinja2",
+]
+
+description = "Easy API client generator"
+readme = "README.md"
+license = "MIT"
+keywords = ["REST", "API", "swagger", "OpenAPI", "functional", "OSDU"]
+
+classifiers = [
+  # How mature is this project? Common values are
+  #   3 - Alpha
+  #   4 - Beta
+  #   5 - Production/Stable
+  "Development Status :: 3 - Alpha",
+
+  # Indicate who your project is intended for
+  "Intended Audience :: Developers",
+
+  # Specify the Python versions you support here.
+  "Programming Language :: Python :: 3.11",
+
+  # Do not upload to PyPI.
+#  "Private :: Do Not Upload",
+
+#  "License :: OSI Approved :: MIT Software License",
+  "Operating System :: OS Independent",
+]
+
+# similar information at...
+# https://github.com/VirusTotal/vt-py/blob/master/setup.py
+

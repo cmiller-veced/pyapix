@@ -1,7 +1,27 @@
+
 # pyapiX
+
 
 A tool for quickly creating high quality API clients (SDKs).  Initial target APIs are
 those defined in Swagger/OpenAPI.
+
+----------------
+
+![foo](https://img.shields.io/badge/hello_there-come_on_in-blue)
+
+![Tuff](https://img.shields.io/badge/some_of_our_tools-8A2BE2)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+
+## Installation
+
+Available on PyPI.
+
+
+    uv pip install pyapix
+    or
+    pip install pyapix
+
+
 
 # How to use it
 
@@ -10,7 +30,7 @@ client will look familiar.  Many of your intuitions from SwaggerDoc or Postman
 will help you in working with the client.
 
     # WoRMS: World Register of Marine Species
-    from apis.worms import _validator, call
+    from pyapix.apis.worms import _validator, call
 
     (endpoint, verb) = '/AphiaClassificationByAphiaID/{ID}', 'get'
     validator = _validator(endpoint, verb)
@@ -52,7 +72,7 @@ will help you in working with the client.
 
     # WoRMS: World Register of Marine Species
 
-    from apis.api_tools import dynamic_validator, dynamic_call
+    from pyapix.apis.api_tools import dynamic_validator, dynamic_call
 
 
     class config:
