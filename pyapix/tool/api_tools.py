@@ -32,7 +32,7 @@ class ListArgs(SurpriseArgs): pass
 class BadEndpointOrVerb(Exception): pass
 
 
-def endpoints_ands_verbs(jdoc):
+def endpoints_and_verbs(jdoc):
     return [(p,v) for p in jdoc['paths'] for v in jdoc['paths'][p]]
 
 
@@ -142,7 +142,6 @@ def prep_func(config):
     return prepped
 
 
-# TODO: mv  (to api_tools?)
 class Service:
     def __init__(self, name, call, _validator, ends):
         self.name = name

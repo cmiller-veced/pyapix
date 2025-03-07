@@ -18,9 +18,10 @@ import json
 import jsonref
 
 from pyapix.tool.tools import parsed_file_or_url
-from pyapix.tool.api_tools import NonDictArgs
+from pyapix.tool.api_tools import (NonDictArgs, ValidDataBadResponse,)
 from pyapix.client.obis import _validator, call, config, altered_raw_swagger
-from pyapix.test_data.obis import test_parameters
+
+test_parameters = parsed_file_or_url('../test_data/obis.yaml')['test_parameters']
 
 
 def test_validate_and_call():

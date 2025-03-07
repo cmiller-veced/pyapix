@@ -1,9 +1,14 @@
 from types import SimpleNamespace
 import typing
+import time
 
 from pyapix.tool.tools import parsed_file_or_url
+from pyapix.osdu.working_with_postman import insert_params
+
 
 count = 0  # for assigning sequential ID to service_request.
+
+class PostTestFailure(Exception): pass
 
 
 class Sequence:
@@ -16,18 +21,14 @@ class Sequence:
     def __init__(self, rseq):
         self.rseq = rseq   # list of requests
 
-    def run_seq(self):
+    def run_seq(self, env):
         for req in self.rseq:
-            req.run(1)
+            req.run(1, env)    # passing 1 for auto-retry.
 
     def show_names(self):
         for req in self.rseq:
             msg = f'{req.name:<22} {req.endpoint} {req.verb}'
             print(f'{msg:<55} {req.tested}')
-
-
-import time
-class PostTestFailure(Exception): pass
 
 
 def request_for_service(client):
@@ -41,15 +42,31 @@ def request_for_service(client):
         tested = 'untested'
         self = SimpleNamespace(locals())
 
-        def run(i):
+        def run(i, environment):
           try:
             print(f'=========== {i} running request... {name}')
             # TODO: optional validation here.
+            # TODO: insert to args from environment here. DONE
+            for (nom, value) in args.items():
+                if (nom in environment.current) and all(c in value for c in '{}'):
+                    ip = insert_params(value, environment.current)
+                    if ip != value:
+                        args[nom] = ip
+            
             response = client.call(endpoint, verb, args)
+            fna = response
             nonlocal self
             try:
                 # TODO: this retry logic is ugly.  FIX.
-                self.tested = post_test(response)
+#                f = lambda response, environment: post_test(response)
+#                self.tested = f(response, environment)
+                try:
+                    post_test.requires
+                except AttributeError:
+                    pass
+                self.tested = post_test(response, environment)
+                # TODO: environment
+                # is relevant here.
             except AssertionError as exc:   # sleep before retry
                 if i < 7:
                     time.sleep(5*i)
@@ -67,7 +84,7 @@ def request_for_service(client):
     return arequest
 
 
-def sequence_creator(client, test_data):
+def sequence_creator(client):     
     # TODO: The whole thing is petstore-centric.
     # SOLUTION:  WORMS+OBIS+ProteinDB
     service_request = request_for_service(client)
@@ -83,9 +100,21 @@ def sequence_creator(client, test_data):
         for dct in sequence:
             i += 1
             requires = dct['post_test']['requires']
-            globs = {key: test_data[key] for key in requires}
             raw_code = dct['post_test']['code']
-            exec(dct['post_test']['code'], locals=dct, globals=globs) # eek!
+#            for key in requires:
+#                line = f'{key} = {dct[key]}\n'    # NO
+#                 line = key + f'= {key}\n'
+#                 # TODO: key needs to be substituted from Environment
+#                 raw_code = line + raw_code
+#            post_test.requires = {key:dct[key] for key in requires}
+            exec(raw_code, locals=dct) # eek!
+            # TODO: NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO
+            # TODO: NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO
+            # Rather than exec and keep the function object, simply execute in
+            # the presence of an Environment.
+            # ?????????????????????
+            # TODO: NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO
+            # TODO: NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO NO
             pr = service_request(**dct) 
             out_seq.append(pr)
         return Sequence(out_seq)
@@ -94,11 +123,11 @@ def sequence_creator(client, test_data):
     return create_sequence
 
 
-def run_seq(sequences):
-    for seq in sequences:
-        seq.show_names()
-        seq.run_seq()
-        seq.show_names()
-        print('\n'.join(['*'*55]*4))
-        print()
+def run_seq(seq, env):
+    seq.show_names()
+    seq.run_seq(env)
+    seq.show_names()
+    print('\n'.join(['*'*55]*4))
+    print()
+
 

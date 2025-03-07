@@ -1,0 +1,85 @@
+
+N:   &N
+  8765
+
+is_x: &is_x |
+  def post_test(response, environment):
+      assert response.is_success
+      return 'OK'
+#       prj = response.json()
+#       feats = prj['features']
+#       assert len(feats) > 1
+#       print('zzzzzzzz', len(feats))
+
+
+is_success: &is_success |
+  def post_test(response, environment):
+    #      print(environment.current['N'])
+      print('xxxxxxxx', environment.current)
+      assert response.is_success
+      pros = response.json()['observationStations']
+      sid = pros[1]
+      for feat in response.json()['features']:
+        sid = feat['properties']['stationIdentifier']
+        break
+      environment.request['stationId'] = sid
+      environment.request['N'] = 99
+      return 'OK'
+
+pt_default: &post_default |
+  def post_test(response, environment):
+      print('yyyyyyyyy', environment.current)
+      environment.request['N'] = 11111
+      return 'default'
+ 
+
+nws_sequence:  !!seq
+  - endpoint: /stations
+    verb: get
+    name: 'Get all stations:'
+    args:
+      'limit': 5
+    post_test: 
+      requires: [N]
+      code: *is_success
+      #      code: [*post_default, *is_success]
+      #      # TODO: multiple post_test functions (later).
+
+  - endpoint: /stations
+    verb: get
+    name: 'Get all stations:'
+    args:
+      'limit': 5
+    post_test: 
+      requires: [N]
+      code: *post_default
+      #      code: [*post_default, *is_success]
+      #      # TODO: multiple post_test functions (later).
+
+
+# TODO: how to get some specific stationId in here?
+# Specifically how to get a station from previous call in the sequence?
+# Requires pre-request code, of course.
+# Or does it?
+# now....
+#       'stationId': 'CO100'
+# will this work?....
+#       'stationId': '{stationId}'
+# YES.  It works.
+# snappy!
+
+
+  - endpoint:  /stations/{stationId}/observations
+    verb: get
+    name: 'Get station observations:'
+    args:
+      #      'stationId': 'CO100'
+      'stationId': '{stationId}'
+      'start': '2025-02-27T18:39:00+00:00'
+      'end': '2025-02-28T18:39:00+00:00'
+      'limit': 50
+    post_test:
+      requires: [N]
+      code: *is_x
+ 
+

@@ -22,7 +22,9 @@ import pytest
 from pyapix.tool.tools import parsed_file_or_url
 from pyapix.tool.api_tools import (NonDictArgs, ValidDataBadResponse,)
 from pyapix.client.worms import _validator, call, config
-from pyapix.test_data.worms import test_parameters
+
+test_parameters = parsed_file_or_url('../test_data/worms.yaml')['test_parameters']
+
 
 
 def test_examples():

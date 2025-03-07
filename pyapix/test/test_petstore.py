@@ -82,13 +82,22 @@ def test_validate_and_call():
     good_param_not_ok = dict(good_param_not_ok)
     globals().update(locals())
 
+from pyapix.osdu.working_with_postman import Environment
 
 def test_seq(name=None):
-    create_sequence = sequence_creator(petstore_api, sequence_data)
+  try:
+#    create_sequence = sequence_creator(petstore_api, sequence_data)
+    create_sequence = sequence_creator(petstore_api)
     snames = [name] if name else ['pet_other_sequence', 'pet_crud_sequence']
+    globals().update(locals())
+    env = Environment()
+#    env.collection['N'] = sequence_data['N']
+    for sn in snames:
+        seq = create_sequence(sequence_data[sn])
+        run_seq(seq, env)
+  finally:
+    # debugging...
     try:
-        run_seq([create_sequence(sequence_data[sn]) for sn in snames])
-    except:
         pto = dict(
             endpoint = peemish.endpoint,
             verb = peemish.verb,
@@ -98,5 +107,7 @@ def test_seq(name=None):
         post_test = peemish.post_test
         response = peemish.response
         raw_code = peemish.raw_code
-        globals().update(locals())
-        raise
+    except:
+        pass
+
+    globals().update(locals())

@@ -284,6 +284,31 @@ def test_environment():
     assert environment.current == {}
 
 
+def read_it():
+    return environment.current['a']
+
+def write_it():
+    environment.request['a'] = 4
+
+def setup_environment():
+    environment = Environment()
+    environment.collection['a'] = 1
+    environment.request['a'] = 2
+    globals().update(locals())
+
+def test_environment2():
+    """Demonstrate how to read/write a global environment.
+    """
+    setup_environment()
+    assert read_it() == 2
+    environment.request.pop('a')
+    assert read_it() == 1
+    environment.request['a'] = 3
+    assert read_it() == 3
+    write_it()
+    assert read_it() == 4
+
+
 # solid
 # TODO: maybe call it fetch_postman_thing
 def fetch_thing(jdoc, *names):

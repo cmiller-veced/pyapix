@@ -74,6 +74,11 @@ class config:
 _validator = dynamic_validator(config)
 call = dynamic_call(config)
 
+from pyapix.tool.tools import parsed_file_or_url
+from pyapix.tool.api_tools import endpoints_and_verbs, Service
+jdoc = parsed_file_or_url(config.swagger_path)
+ends = endpoints_and_verbs(jdoc)
+service = Service('NWS', call, _validator, ends)
 
 # vd = _validator(endpoint, verb)
 # vd.is_valid(parameters)

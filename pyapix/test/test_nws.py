@@ -24,7 +24,12 @@ from pyapix.client.nws import call, _validator, altered_raw_swagger, config
 # The behavior of the two is currently maybe surprising / inconsistent.
 # but the code is currently minimal.
 # but the change will be a one-liner.
-from pyapix.test_data.nws import test_parameters
+
+pfile = '../test_data/nws.yaml'
+test_parameters = parsed_file_or_url(pfile)['test_parameters']
+sfile = '../test_data/nws_sequence.yaml'
+sdata = parsed_file_or_url(sfile)
+
 
 
 # TODO: clarify messaging.
@@ -163,4 +168,52 @@ def test_current_alerts():
 def test_nws_series():
     # Because returning a value from a test generates a pytest warning.
     demo_nws_series()
+
+
+from pyapix.client.nws import call, _validator, altered_raw_swagger, config
+from pyapix.client import nws
+from pyapix.tool.peemish import run_seq, sequence_creator
+from pyapix.tool import peemish
+from pyapix.osdu.working_with_postman import Environment
+
+sdata = parsed_file_or_url(sfile)
+
+def test_seq():
+    create_sequence = sequence_creator(nws.service)
+    cs = create_sequence(sdata['nws_sequence'])
+
+    env = Environment()     # Update the env with sdata
+    env.collection['N'] = sdata['N']
+    run_seq(cs, env)
+    print(env.current)
+
+    # exploration below
+    response = peemish.response
+    prj = peemish.response.json()
+    feats = prj['features']
+    for feat in feats:
+        props = feat['properties']
+        temp = feat['properties']['temperature']['value']
+    globals().update(locals())
+#     prf = peemish.response.json()['features']
+#     for feat in prf:
+#         fp = feat['properties']
+#         # contains different zones; fireZone, forecastZone, etc.
+#         forecast = fp['forecast']
+#         county = fp['county']
+#         fire = fp['fireWeatherZone']
+#         observation = fp['@id']
+# 
+#     fts = set(f['properties']['@type'] for f in prf)
+#     pros = peemish.response.json()['observationStations']
+#     for station in pros: pass
+#     stations = dict(
+#         station=station,
+#         forecast=forecast,
+#         county=county,
+#         fire=fire,
+#         observation=observation
+#     )
+    globals().update(locals())
+
 

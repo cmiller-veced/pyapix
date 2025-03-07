@@ -15,17 +15,11 @@
 from datetime import datetime
 
 from .info import local
-try:
-    from pyapix.tool.tools import LocalValidationError, ValidDataBadResponse
-    from pyapix.tool.api_tools import dynamic_validator, dynamic_call, SurpriseArgs
-    from pyapix.tool import api_tools
-    from pyapix.tool.api_tools import *
-except:
-    raise
-    from .tools import (LocalValidationError, ValidDataBadResponse, )
-    from .api_tools import dynamic_validator, dynamic_call, SurpriseArgs
-    from . import api_tools
-    from .api_tools import *
+from pyapix.tool.tools import LocalValidationError, ValidDataBadResponse
+from pyapix.tool.api_tools import dynamic_validator, dynamic_call, SurpriseArgs, Service
+from pyapix.tool import api_tools
+from pyapix.tool.api_tools import *
+
 
 class Foo(LocalValidationError): pass
 
@@ -245,4 +239,12 @@ api_tools.parameters_to_schema = parameters_to_schema
 
 _validator = dynamic_validator(config)
 call = dynamic_call(config)
+
+
+from pyapix.tool.tools import parsed_file_or_url
+from pyapix.tool.api_tools import endpoints_and_verbs
+jdoc = parsed_file_or_url(config.swagger_path)
+ends = endpoints_and_verbs(jdoc)
+service = Service('Petstore', call, _validator, ends)
+
 
