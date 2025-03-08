@@ -1,3 +1,6 @@
+"""
+Quick and dirty code for mapping US counties.
+"""
 import os
 import csv
 

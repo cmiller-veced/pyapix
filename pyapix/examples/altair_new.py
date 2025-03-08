@@ -1,6 +1,10 @@
 """
 Plot data for every US county.
 #https://altair-viz.github.io/user_guide/transform/lookup.html#user-guide-lookup-transform
+
+This code is quick and dirty.
+Demonstrates how to show NWS weather alerts on a US map of all counties in the
+contiguous 48.
 """
 import random
 
