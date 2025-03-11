@@ -66,13 +66,13 @@ def find_active_alert():
 def make_chart():
     cid_set = find_active_alert()       # a list of county IDs.
 
+    # Quick and dirty overwrite unemployment data.
     for (index, row) in ud.iterrows():
         rid = str(int(row['id']))
         if rid in cid_set:
             ud.at[index, 'rate'] = 0.99
 
-    chart = alt.Chart(counties).mark_geoshape().encode(
-        color='rate:Q'
+    chart = alt.Chart(counties).mark_geoshape().encode(color='rate:Q'
     ).transform_lookup(
         lookup='id',
         from_=alt.LookupData(ud, 'id', ['rate'])

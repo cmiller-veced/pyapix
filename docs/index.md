@@ -27,7 +27,7 @@ All pertinent information comes from the OpenAPI/Swagger file.
 ## Testing
 
     git clone https://github.com/cmiller-veced/pyapix.git
-    cd pyapix/pyapix/examples
+    cd pyapix/pyapix/test
     pytest .
     or
     pytest test_nws.py

@@ -5,7 +5,7 @@ from pyapix.tool import api_tools
 from pyapix.tool.api_tools import (dynamic_validator, dynamic_call, SurpriseArgs)
 from pyapix.tool.tools import (LocalValidationError, ValidDataBadResponse, )
 from pyapix.client.info import local
-from pyapix.tool.api_tools import endpoints_ands_verbs, Service
+from pyapix.tool.api_tools import endpoints_and_verbs, Service
 from pyapix.tool.tools import parsed_file_or_url
 
 
@@ -31,7 +31,7 @@ class config:
 
 
 name = 'Unit'
-ends = endpoints_ands_verbs(parsed_file_or_url(config.swagger_path))
+ends = endpoints_and_verbs(parsed_file_or_url(config.swagger_path))
 _validator = dynamic_validator(config)
 call = dynamic_call(config)
 service = Service(name, call, _validator, ends)

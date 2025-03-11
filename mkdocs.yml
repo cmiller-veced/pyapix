@@ -9,6 +9,7 @@ nav:
   - Creating Clients: defining_clients.md
   - Design: design.md
   - Postman Alternative: peemish.md
+  - Leveraging Postman: leverage_postman.md
 
 
 # site_url: !ENV READTHEDOCS_CANONICAL_URL
