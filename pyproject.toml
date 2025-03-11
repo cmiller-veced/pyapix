@@ -81,7 +81,8 @@ line-ending = "auto"
 name = "pyapiX"
 #version = "2025.02.02"
 #version = "2025.02.07"
-version = "2025.02.14"
+#version = "2025.02.14"
+version = "2025.02.21"
 requires-python = ">= 3.11"
 dependencies = [
   "httpx",
