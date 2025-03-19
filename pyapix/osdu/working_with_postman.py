@@ -161,24 +161,24 @@ def fix_colon_prefix(path):
     globals().update(locals())
 
 
-"""
-enames = ['Core Services', 'Entitlements']   # good output
-# show_contents(pmjdoc, *enames)   # good output
-
->>> ebnames = ['Core Services', 'CRS Catalog', 'Entitlements']
-TODO:  weird things happen with this input.  fix.
->>> show_contents(pmjdoc, *ebnames)
-Core Services
-    CRS Catalog
-        Entitlements
-            i V3
-            r Health Check
->>> show_contents(pmjdoc, 'Core Services', 'CRS Catalog')
-Core Services
-    CRS Catalog
-        i V3
-        r Health Check
-"""
+# """
+# enames = ['Core Services', 'Entitlements']   # good output
+# # show_contents(pmjdoc, *enames)   # good output
+# 
+# >>> ebnames = ['Core Services', 'CRS Catalog', 'Entitlements']
+# TODO:  weird things happen with this input.  fix.
+# >>> show_contents(pmjdoc, *ebnames)
+# Core Services
+#     CRS Catalog
+#         Entitlements
+#             i V3
+#             r Health Check
+# >>> show_contents(pmjdoc, 'Core Services', 'CRS Catalog')
+# Core Services
+#     CRS Catalog
+#         i V3
+#         r Health Check
+# """
 # TODO: mv to where fetch_thing is.
 # TODO: change name to show_pm_contents
 # or pm_show_contents
@@ -557,6 +557,124 @@ def make_endpoint(url, service):
                     if e.endswith(endpoint):
                         endpoint = e
     return fix_colon_prefix(endpoint)
+  finally:
+    globals().update(locals())
+
+
+# ########################################################################## #
+# ########################################################################## #
+# ########################################################################## #
+
+
+from collections import defaultdict
+from pyapix.tool.jtool import leaf_paths, to_jsonpath
+from jsonpath_ng import ext
+
+
+def pm_file(dname, fname):
+    preship_dir = '~/osdu/pre-shipping/R3-M24/AWS-M24'
+    fpath = os.path.expanduser(f'{preship_dir}/{dname}/{fname}')
+    return parsed_file_or_url(fpath)
+    
+
+def pm_item_dict(jdoc):
+    item_dict = defaultdict(lambda:[])
+    unique_requests = set()
+    pleaf = leaf_paths(jdoc)
+
+    for path in pleaf:
+        if 'request' in path:
+            idx = path.index('request')
+            unique_requests.add(to_jsonpath(path[:idx]))
+
+    for request_path in sorted(unique_requests, key=sort_thing):
+        je = ext.parse(request_path)
+        [rm] = je.find(jdoc)
+        rfp = str(rm.full_path)
+        trunc = rfp[:rfp.rindex('.')]
+        item_dict[trunc].append(rfp)
+
+#    assert len(unique_requests) == 152
+    return item_dict
+
+
+def test_pmx():
+  try:
+    for (dname, fname) in [
+      ('Policy', 'AWS_OSDUR3M24_Policy_Collection.postman_collection.json'),
+      ('DDMS Wellbore', 'Wellbore_DDMS_v3.0.postman_collection.json'),
+      ('Core Services', 'AWS_OSDUR3M24_CoreServices_Collection.postman_collection.json'),
+      ]:
+        jdoc = pm_file(dname, fname)
+        item_dict = pm_item_dict(jdoc)
+    #    assert len(item_dict) == 42
+        print('========================================================')
+
+        # NOTE This is snappy.  Transforms PM doc into a dict where the keys are
+        # terminal `item`s and the values are the list of `request`s that fall under
+        # that `item`.
+        # Now it is easy to iterate.
+        for ipath in item_dict:
+            print(ipath)
+            for rpath in item_dict[ipath]:
+                je = ext.parse(rpath)
+                [rm] = je.find(jdoc)
+                rfp = str(rm.full_path)
+                print('  ', rpath, rm.value['name'])
+  finally:
+    globals().update(locals())
+
+
+def sort_thing(jpath):
+    """
+    # TODO: this would be a good homework assignment.
+    # With follow-up forbidding use of `eval`.
+    jpath = 'item.[1].item.[5].item.[0].item.[1].item.[1].item'
+    """
+    inner = jpath.replace('item', '').replace('.', '').replace(']', ', ').replace('[', '')
+    return eval('(' + inner + ')')
+
+
+def do_item(thing, indent=0):
+  try:
+    is_item_or_request_but_not_both(thing)
+    if not 'item' in thing:
+        return do_request(thing, indent)
+    name = thing['name'] if 'name' in thing else 'base'
+    global items_seen
+    items_seen.append(name)
+    assert not is_request(thing)
+    assert has_items(thing)
+    items = thing['item']
+    assert type(items) is list
+    print('i', ' '*indent, name, len(items))
+    for ithing in items:
+        assert type(ithing) is dict
+        if 'item' in ithing:
+            do_item(ithing, indent+4)
+        else:   # it is a request
+            print(' '*(indent+4), ithing['name'])
+            do_request(ithing, indent+4)
+  finally:
+    globals().update(locals())
+
+ 
+names = ['item', 'request']
+
+
+def fun(thing):
+    globals().update(locals())
+    try:
+        ir = is_request(thing)
+    except:
+        ir = 'no'
+    print(ir, type(thing))
+
+
+def test_pm():
+  try:
+    pdoc = pm_file()
+    recur(pdoc, fun)
   finally:
     globals().update(locals())
 
