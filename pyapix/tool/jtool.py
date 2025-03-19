@@ -10,6 +10,7 @@ Along the way I have
 - 
 
 NEXT.  Read in a Postman file.
+DONE.  And very nicely too.   Using leaf paths.
 
 """
 import copy
@@ -22,7 +23,6 @@ from pyapix.osdu.client import unit
 
 
 identity_func  = lambda x:x
-#other_id_function = lambda dct, key: dct[key]
 
 
 def deep_key(obj, keys):
@@ -45,11 +45,17 @@ def _(arg: dict, fun=identity_func):
     return {key:recur(fun(arg[key]), fun) for key in arg}
 
 
+# swagger specific   NO   NO   NO   NO   NO   NO   NO   NO   NO 
+# references are NOT at all swagger-specific.   DUH
+# swagger specific
 def find_all_refs(jdoc):
     aps = leaf_paths(jdoc)
     return [lst for lst in aps if lst[-2] == '$ref']
             
 
+# swagger specific   NO   NO   NO   NO   NO   NO   NO   NO   NO 
+# references are NOT at all swagger-specific.   DUH
+# swagger specific
 # TODO: needs testing.
 def replace_all_refs(jdoc):
     """
@@ -62,6 +68,9 @@ def replace_all_refs(jdoc):
     # NOTE: not functional
 
 
+# swagger specific   NO   NO   NO   NO   NO   NO   NO   NO   NO 
+# references are NOT at all swagger-specific.   DUH
+# swagger specific
 def has_ref(dct):
     for key in dct:
         dkv = dct[key]
@@ -72,6 +81,8 @@ def has_ref(dct):
     return None
 
 
+# This belongs here.   It's been used to good effect on both PM and swagger.
+# fails because of mutable keys?
 from functools import lru_cache
 #@lru_cache
 def leaf_paths(jdoc):
@@ -117,10 +128,13 @@ def path_prep(thing):
     return thing
 
 
+# belongs here
 def to_jsonpath(lst):
     return '.'.join(path_prep(x) for x in lst)
 
 
+# swagger specific   NO   NO   NO   NO   NO   NO   NO   NO   NO 
+# references are NOT at all swagger-specific.   DUH
 def reference_value(jdoc, raw_ref):
     ref_path = raw_ref.split('/')[1:]
     return deep_key(jdoc, ref_path)
@@ -153,7 +167,6 @@ def xinline_ref(rp, jdoc):
 # ########################################################################## #
 # ########################################################################## #
 
-# TODO: bring in book data.
 
 def test_docs():
     jd1 = dict(
@@ -398,15 +411,4 @@ def test_one_ref():
     epn = namespacify(epi)
     epn = namespacify(ep2)
     globals().update(locals())
-
-
-# def inline_section(dct, jdoc):
-#     section = copy.deepcopy(dct)
-#     while '$ref' in str(section):
-#         while has_ref(section):
-#             section = xinline_ref(section, has_ref(section), jdoc)
-#     for key in section:
-#         section[key] = inline_section(section[key], jdoc)
-#     return section
-
 
