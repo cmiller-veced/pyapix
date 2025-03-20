@@ -6,132 +6,15 @@ The focus is on OSDU preshipping.
 import os
 import json
 from functools import lru_cache
-import typing
-from typing import TypedDict
-from typing import Required, NotRequired
+from collections import defaultdict
 
 from pyapix.tool.tools import parsed_file_or_url
+from pyapix.tool.jtool import leaf_paths, to_jsonpath
+from jsonpath_ng import ext
 from pyapix.tool.exploratory import pop_inputs, pop_key
 
-items_seen = []
-requests_seen = []
-all_requests = []
 
 
-# TODO: rename?   This is used in other two other files.
-def check_do_item(pm_files):
-  try:
-    global all_requests
-    all_requests = []
-    for fpath in pm_files():
-        with open(fpath) as fh: 
-            jdoc = json.load(fh)
-        print(fpath.split('/')[-1].split('.')[0])
-        do_item(jdoc)
-        print()
-  finally:
-    globals().update(locals())
-
-
-# TODO: review
-def do_item(thing, indent=0):
-  try:
-    is_item_or_request_but_not_both(thing)
-    if not 'item' in thing:
-        return do_request(thing, indent)
-    name = thing['name'] if 'name' in thing else 'base'
-    global items_seen
-    items_seen.append(name)
-    assert not is_request(thing)
-    assert has_items(thing)
-    items = thing['item']
-    assert type(items) is list
-    print('i', ' '*indent, name, len(items))
-    for ithing in items:
-        assert type(ithing) is dict
-        if 'item' in ithing:
-            do_item(ithing, indent+4)
-        else:   # it is a request
-            print(' '*(indent+4), ithing['name'])
-            do_request(ithing, indent+4)
-  finally:
-    globals().update(locals())
-
-
-# untidy
-# OK.  Successfully decoded all headers in OSDU.
-def do_headers(headers):
-  try:
-    return {h['key']: h['value'] for h in headers}
-
-    standard_header_keys = ['key', 'type', 'value']
-    standard_header_keys = ['key', 'value']
-
-    assert type(headers) is list
-    if not headers:
-        return headers
-    assert len(headers) < 14
-    for header in headers:
-        assert all(k in header for k in standard_header_keys)
-#        hkeys = sorted(list(header.keys()))
-    return [sorted(list(h.keys())) for h in headers]
-    return headers
-  finally:
-    globals().update(locals())
-
-
-# untidy
-def do_request(thing, indent):
-  try:
-    assert is_request(thing)
-    global all_requests
-    all_requests.append(thing)
-    assert not has_items(thing)
-    global requests_seen
-    requests_seen.append(thing['name'])
-    request = thing['request']
-    assert type(request) is dict
-    for word in ['method', 'header', 'url']:
-        assert word in list(request)
-    other_words = ['auth', 'body', 'description']  # may be in list(request)
-
-    url_raw = request['url']['raw']
-    print(' '*(indent+2), url_raw)
-
-    dh = do_headers(request['header'])
-#    print(' '*(indent+2), dh)
-#    print(' '*(indent+2), len(dh))
-
-    if 'body' in request:
-        bm = request['body']['mode']
-        bd = decode_body(request['body'])
-    else:
-        bm = bd = 'NO body'
-#    print(' '*(indent+2), bm)
-#    print(' '*(indent+2), bd)
-    if 'auth' in request:
-        ra = request['auth']
-  finally:
-    globals().update(locals())
-
-
-def has_items(thing):
-    return 'item' in thing
-
-def is_request(thing):
-    return 'request' in thing
-
-verified_mutually_exclusive = []
-def is_item_or_request_but_not_both(thing):
-    assert is_request(thing) or has_items(thing)
-    assert not (is_request(thing) and has_items(thing))
-    global verified_mutually_exclusive
-    
-    name = thing['name'] if 'name' in thing else 'base'
-    verified_mutually_exclusive.append(name)
-    # TODO: this is a job for a closure.
-    # TODO: appears to be capturing `items` but not `requests`.
-    # pprint(set(verified_mutually_exclusive))
 
 
 # TODO: if any of the url/path/query parsing stuff is needed, it is this.
@@ -161,49 +44,6 @@ def fix_colon_prefix(path):
     globals().update(locals())
 
 
-# """
-# enames = ['Core Services', 'Entitlements']   # good output
-# # show_contents(pmjdoc, *enames)   # good output
-# 
-# >>> ebnames = ['Core Services', 'CRS Catalog', 'Entitlements']
-# TODO:  weird things happen with this input.  fix.
-# >>> show_contents(pmjdoc, *ebnames)
-# Core Services
-#     CRS Catalog
-#         Entitlements
-#             i V3
-#             r Health Check
-# >>> show_contents(pmjdoc, 'Core Services', 'CRS Catalog')
-# Core Services
-#     CRS Catalog
-#         i V3
-#         r Health Check
-# """
-# TODO: mv to where fetch_thing is.
-# TODO: change name to show_pm_contents
-# or pm_show_contents
-# or pm.show_contents
-def show_contents(pmjdoc, *names):
-    """
-    show_contents(pmjdoc)
-    show_contents(pmjdoc, 'Core Services')
-    show_contents(pmjdoc, 'Core Services', 'Entitlements')
-    show_contents(pmjdoc, 'Core Services', 'CRS Catalog', 'V3')
-    """
-    pm_item = fetch_thing(pmjdoc, *names)
-    space = ' '
-    i = 0
-    indent = space * i
-    for name in names:
-        print(f'{indent}{name}')
-        i += 4
-        indent = space * i
-    if 'item' in pm_item:
-        for dct in pm_item['item']:
-            t = 'r' if 'request' in dct else 'i' 
-            print(f"{indent}{t} {dct['name']}")
-
-
 # solid below here.
 # ######################################################################## #
 
@@ -225,6 +65,36 @@ def insert_params(template, parameters):
     from jinja2 import Environment as j2Environment
     env = j2Environment(autoescape=select_autoescape())
     return env.from_string(template).render(**parameters)
+
+
+# solid
+# OK.  Successfully decoded all bodies in OSDU.
+def decode_body(body):
+    bm = body['mode']
+    globals().update(locals())
+    assert bm in ['raw', 'urlencoded', 'file', 'formdata']
+    br = body[bm]
+    if (type(br) is not str) or (not br):
+        return br
+    return json.loads(br)
+
+
+# TODO: is this needed?
+def decode_url(url):
+    """For working with Postman.
+    But should be much more general.
+    Pull query parameters, if present.
+    """
+    if not '?' in url:
+        return (fix_colon_prefix(url), '')
+    assert url.count('?') == 1
+    front, end = url.split('?')
+    parts = end.split('&')
+    assert  all(len(x.split('='))==2 for x in parts)
+    query_params = dict(x.split('=') for x in parts)
+    front = fix_colon_prefix(front)
+    return (front, query_params)
+
 
 
 # solid
@@ -263,6 +133,227 @@ class Environment:
         self.sequence = {}
         self.request = {}
         self._current = {}
+
+
+# postman general
+def pm_item_dict(jdoc):
+    item_dict = defaultdict(lambda:[])
+    unique_requests = set()
+    pleaf = leaf_paths(jdoc)
+
+    for path in pleaf:
+        if 'request' in path:
+            idx = path.index('request')
+            unique_requests.add(to_jsonpath(path[:idx]))
+
+    for request_path in sorted(unique_requests, key=sort_thing):
+        je = ext.parse(request_path)
+        [rm] = je.find(jdoc)
+        rfp = str(rm.full_path)
+        trunc = rfp[:rfp.rindex('.')]
+        item_dict[trunc].append(rfp)
+
+#    assert len(unique_requests) == 152
+    return item_dict
+
+
+# postman general
+def sort_thing(jpath):
+    """
+    # TODO: this would be a good homework assignment.
+    # With follow-up forbidding use of `eval`.
+    jpath = 'item.[1].item.[5].item.[0].item.[1].item.[1].item'
+    """
+    inner = jpath.replace('item', '').replace('.', '').replace(']', ', ').replace('[', '')
+    return eval('(' + inner + ')')
+
+
+# untidy
+# OK.  Successfully decoded all headers in OSDU.
+def do_headers(headers):
+  try:
+    return {h['key']: h['value'] for h in headers}
+
+    standard_header_keys = ['key', 'type', 'value']
+    standard_header_keys = ['key', 'value']
+
+    assert type(headers) is list
+    if not headers:
+        return headers
+    assert len(headers) < 14
+    for header in headers:
+        assert all(k in header for k in standard_header_keys)
+#        hkeys = sorted(list(header.keys()))
+    return [sorted(list(h.keys())) for h in headers]
+    return headers
+  finally:
+    globals().update(locals())
+
+
+# TODO: review
+def do_item(thing, indent=0):
+  try:
+    if not 'item' in thing:
+        return do_request(thing, indent)
+    name = thing['name'] if 'name' in thing else 'base'
+    assert not is_request(thing)
+    items = thing['item']
+    assert type(items) is list
+    print('i', ' '*indent, name, len(items))
+    for ithing in items:
+        assert type(ithing) is dict
+        if 'item' in ithing:
+            do_item(ithing, indent+4)
+        else:   # it is a request
+            print(' '*(indent+4), ithing['name'])
+            do_request(ithing, indent+4)
+  finally:
+    globals().update(locals())
+
+
+report_mode = False
+report_mode = True
+debug_mode = report_mode and False
+
+
+def fetch_client(url):
+  try:
+    1/0
+  finally:
+    globals().update(locals())
+
+def find_endpoint(url):
+  try:
+    1/0
+  finally:
+    globals().update(locals())
+
+def fetch_args(url, request):
+  try:
+    1/0
+  finally:
+    globals().update(locals())
+
+
+alf = set()
+fu = []
+def find_service(url):
+  try:
+    for sname in epdict:
+        for ep in epdict[sname]:
+            if url.endswith(ep):
+                return (sname, ep)
+    # osdu-specific
+    parts = url.split('/api/')    # OSDU specific
+    last = parts[-1]
+    t = last.split('/')[0]
+    s = t.replace('{', '').split('_')[0].lower()
+    return (s, '?')
+    return t
+    return parts
+  finally:
+    globals().update(locals())
+# >>> fu
+# ['']
+# >>> alf
+# {'', 'auth', 'pws', 'entitlements', 'notification', 'token', 'unit', 'register', 'partition', 'signedurl}}', 'wellbore', 'https:', 'schema-service', 'dataset', 'seismic-store', 'legal', 'search', 'storage', 'policy', 'crs'}
+# TODO: expand url before finding service.                 NO
+# OR may need to search all services for the endpoint.     DONE
+ 
+from pyapix.osdu.client import (unit, legal, entitlements, crs_catalog,
+    crs_conversion, 
+)
+clients = (unit, legal, entitlements, crs_catalog, crs_conversion, )
+epdict = {c.service.name: set(ep for (ep, v) in c.service.ends) for c in clients}
+odict = {c.service.name.lower(): c.service for c in clients}
+cdict = defaultdict(lambda:'?')
+cdict.update(odict)
+
+
+def do_request(thing, indent):
+  try:
+    # TODO: validation:  
+    #     identify service, endpoint, verb   WIP
+    #     fetch data from `thing`            WIP
+    #     create/fetch api client            WIP
+    #     fetch validator              
+    #     validate data
+    request = thing['request']
+    url_raw = request['url']['raw']
+
+    (url, params) = decode_url(url_raw)
+    (sname, ep) = find_service(url)      # (service_name, endpoint)
+    service = cdict[sname]
+    verb = request['method'].lower()
+
+    dh = do_headers(request['header'])
+
+    if 'body' in request:
+        bm = request['body']['mode']
+        bd = decode_body(request['body'])
+    else:
+        bm = bd = 'NO body'
+
+    if 'auth' in request:
+        ra = request['auth']
+
+    if report_mode:
+        if params:
+            assert type(params) is dict
+        if not fs: fu.append(url_raw)
+        alf.add(fs)
+        assert type(request) is dict
+        for word in ['method', 'header', 'url']:
+            assert word in request
+        other_words = ['auth', 'body', 'description']  # may be in request
+        print(' '*(indent+2), 'url_raw', url_raw)
+        print(' '*(indent+2), fs)
+
+    if debug_mode:
+        print(' '*(indent+2), dh)
+        print(' '*(indent+2), len(dh))
+        print(' '*(indent+2), bm)
+        print(' '*(indent+2), bd)
+
+  finally:
+    globals().update(locals())
+
+
+# Test
+# ########################################################################## #
+# ########################################################################## #
+# ########################################################################## #
+
+
+def test_pmx():
+  try:
+    from pyapix.osdu.config import path
+    for fpath in [
+            path.policy,
+            path.wellbore_ddms,
+            path.core_services,
+      ]:
+        jdoc = parsed_file_or_url(fpath)
+        item_dict = pm_item_dict(jdoc)
+    #    assert len(item_dict) == 42
+        print('========================================================')
+
+        # NOTE This is snappy.  Transforms PM doc into a dict where the keys are
+        # terminal `item`s and the values are the list of `request`s that fall under
+        # that `item`.
+        # Now it is easy to iterate.
+        for ipath in item_dict:
+            print(ipath)
+            for rpath in item_dict[ipath]:
+                je = ext.parse(rpath)
+                [rm] = je.find(jdoc)
+                rfp = str(rm.full_path)
+                rmv = rm.value
+                print('  ', rpath, rmv['name'])
+                dr = do_request(rmv, 4)
+
+  finally:
+    globals().update(locals())
 
 
 def test_environment():
@@ -307,110 +398,6 @@ def test_environment2():
     assert read_it() == 3
     write_it()
     assert read_it() == 4
-
-
-# solid
-# TODO: maybe call it fetch_postman_thing
-def fetch_thing(jdoc, *names):
-    """
-    >>> innermost = [
-    ...     dict(name='bat', t=1),
-    ...     dict(name='x', t=2),
-    ...     dict(name='y'),
-    ... ]
-    ... 
-    >>> mid = [
-    ...     dict(name='bar', item=innermost),
-    ...     dict(name='c', t=3, item=[]),
-    ...     dict(name='d'),
-    ... ]
-    ... 
-    >>> outermost = dict(item=[
-    ...     dict(name='foo', item=mid),
-    ...     dict(name='a', item=[]),
-    ...     dict(name='b'),
-    ... ])
-    ... 
-
-    >>> assert fetch_thing(outermost) == outermost
-    >>> assert fetch_thing(outermost, 'foo') == dict(name='foo', item=mid)
-    >>> assert fetch_thing(outermost, 'foo', 'bar') == dict(name='bar', item=innermost)
-    >>> assert fetch_thing(outermost, 'foo', 'bar', 'bat') == {'name': 'bat', 't': 1}
-    """
-    sub = jdoc
-    for name in names:
-        for thing in sub['item']:
-            if thing['name'] == name:
-                sub = thing
-                break     # the first thing with that name
-    return sub
-
-
-# solid
-# OK.  Successfully decoded all bodies in OSDU.
-def decode_body(body):
-    bm = body['mode']
-    assert bm in ['raw', 'urlencoded', 'file']
-    br = body[bm]
-    if (type(br) is not str) or (not br):
-        return br
-    return json.loads(br)
-
-
-# OK
-# Now we can
-# 1. Recursively iterate over all things.
-# 2. Fetch arbitrary, deeply nested things.
-# TODO: 
-# - run individual request.
-# - run a sequence of requests.
-# - cleanup the jdoc by removing empty things.
-# - add and subtract things.
-
-
-# Questionable usefulness below
-# ########################################################################## #
-
-# used once.
-def write_data():
-    # TODO: write petstore to yaml.
-    # !!!!!!!!!! WARNING !!!!!!!!!!
-    # Use great caution when writing yaml because it can come out quite garbled.
-    # All info will be there but with references not very readable.
-#    from pyapix.test_data import petstore
-    import yaml
-    fname = 'petstore_dataX.yaml'
-    data = petstore.__dict__
-    for key in dubs:
-        data.pop(key)
-    with open (fname, 'w') as fh:
-        yaml.dump(data, fh)
-
-# not used
-@lru_cache
-def postman_schema():
-    # all postman schemas == v1.0.0  v2.0.0  v2.1.0
-    # OSDU Preshipping postman files have this...
-    'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
-    # for schema.  But that link is   301 Permanently moved.
-    postman_schema = 'https://schema.postman.com/collection/json/v2.1.0/draft-07/collection.json'
-    return parsed_file_or_url(postman_schema)
-
-
-# TODO: is this needed?
-def decode_url(url):
-    """For working with Postman.
-    But should be much more general.
-    """
-    if not '?' in url:
-        return (fix_colon_prefix(url), '')
-    assert url.count('?') == 1
-    front, end = url.split('?')
-    parts = end.split('&')
-    assert  all(len(x.split('='))==2 for x in parts)
-    query_params = dict(x.split('=') for x in parts)
-    front = fix_colon_prefix(front)
-    return (front, query_params)
 
 
 def test_decode_url():
@@ -458,254 +445,25 @@ def test_decode_url():
     globals().update(locals())
 
 
-def exp_with_postman_schema():
-    pm_schema = parsed_file_or_url('~/local/postman/2.1.0.json')
-    request_schema = pm_schema['definitions']['request']
-    pm_defs = pm_schema['definitions']
-    ['$schema', '$id', 'title', 'description', 'oneOf']
-    ['url', 'auth', 'proxy', 'certificate', 'method', 'description', 'header', 'body']
-
-    script_schema = pm_schema['definitions']['script']
-    ['$schema', '$id', 'title', 'type', 'description', 'properties']
-    ['id', 'type', 'exec', 'src', 'name']
+def test_all():
+    test_pmx()
+    test_environment()
+    test_environment2()
+    test_decode_url()
 
 
-def exp_with_TypedDict():
-    Point2D = TypedDict('Point2D', {'in': int, 'x-y': int})
-    # TODO: NOTE
-    # This is interesting.  Keys that are keywords or contain '-'.
-    # Could be useful when we want to use keys like 
-    # /zones/:type/:zoneId
-    Point2D = TypedDict('Point2D', {'/zones/:type/:zoneId': int, 'x-y': int})
-
-    p2 = Point2D( {'z': 3, 'label': 'bad'})
-    p2 = Point2D(t= 3, label= 'bad')
-
-
-class Request(TypedDict, total=True):
-    header: Required[dict]
-    body: typing.Dict  = None
-    description: str  = None
-    method: str     # enum
-    url: str     # matching a regex
-
-class MyParameters(TypedDict, total=True):
-    header: NotRequired[dict]
-    body: NotRequired[dict]
-    query: NotRequired[dict]
-    args: NotRequired[dict] = {}
- 
-class MyRequest(TypedDict, total=True):
-    endpoint: str     # matching a regex
-    method: str     # enum
-    parameters: MyParameters = None
-    post_test:  typing.Callable   = lambda _:None
-    # TODO?: auth: dict  # or such?
-
-# MyRequest and MyParameters can be used together to create a Request object.
-# That will be the mapping between my stuff and Postman schema.
-
-mr = MyRequest()
-mr = MyRequest(ep=1)
-mr = MyRequest(endpoint=1, method='have', parameters={})
-
-rt = Request()
-rt = Request(x=2)
-rt = Request(header=2, url='u', method='m')
+# OK
+# Now we can
+# 1. Recursively iterate over all things.
+# 2. Fetch arbitrary, deeply nested things.
+# TODO: 
+# - run individual request.
+# - run a sequence of requests.
+# - cleanup the jdoc by removing empty things.
+# - add and subtract things.
 
 
-#    Newly moved to this file.......
-
-
-# TODO: mv to do_postman_osdu  DONE
-def is_version(word):
-    """
-    >>> assert is_version('v3') is True
-    >>> assert is_version('v222') is True
-    >>> assert is_version('V222') is True
-    >>> assert is_version('vx2') is False
-    """
-    if word[0].lower() == 'v' and word[1:].isdigit():
-        return True
-    return False
-
-
-# TODO: mv to do_postman_osdu?    YES  DONE
-def is_bad_schema(schema):
-    if schema == { 'required': [], 'properties': {},
-     'additionalProperties': False, 'type': 'object'}:
-        return True
-    if schema['properties'] == {} and schema['additionalProperties'] == False:
-        return True
-    return False
-
-
-# TODO: mv with func below  DONE
-def make_endpoint(url, service):
-  try:
-    eps = [e for (e,v) in service.ends]   # all endpoints for swagger
-    up = url['path']
-    endpoint = url['raw'].replace(url['host'][0], '')
-    for i, word in enumerate(up):
-        if is_version(word):
-            svc = up[:i+1]
-            endpoint = '/' + '/'.join(up[i+1:])
-            # check here to see if swagger endpoint contains version or not.
-            # Include the version if it is in the swagger file.
-            if endpoint not in eps:
-                for e in eps:
-                    if e.endswith(endpoint):
-                        endpoint = e
-    return fix_colon_prefix(endpoint)
-  finally:
-    globals().update(locals())
-
-
+# Questionable usefulness below
 # ########################################################################## #
-# ########################################################################## #
-# ########################################################################## #
-
-
-from collections import defaultdict
-from pyapix.tool.jtool import leaf_paths, to_jsonpath
-from jsonpath_ng import ext
-
-
-def pm_file(dname, fname):
-    preship_dir = '~/osdu/pre-shipping/R3-M24/AWS-M24'
-    fpath = os.path.expanduser(f'{preship_dir}/{dname}/{fname}')
-    return parsed_file_or_url(fpath)
-    
-
-def pm_item_dict(jdoc):
-    item_dict = defaultdict(lambda:[])
-    unique_requests = set()
-    pleaf = leaf_paths(jdoc)
-
-    for path in pleaf:
-        if 'request' in path:
-            idx = path.index('request')
-            unique_requests.add(to_jsonpath(path[:idx]))
-
-    for request_path in sorted(unique_requests, key=sort_thing):
-        je = ext.parse(request_path)
-        [rm] = je.find(jdoc)
-        rfp = str(rm.full_path)
-        trunc = rfp[:rfp.rindex('.')]
-        item_dict[trunc].append(rfp)
-
-#    assert len(unique_requests) == 152
-    return item_dict
-
-
-class base_path:
-    dir = '~/osdu/pre-shipping/R3-M24/AWS-M24'
-
-
-class path(base_path): pass
-class path:
-    base_dir = base_path.dir
-    (d, f) = ('Policy', 'AWS_OSDUR3M24_Policy_Collection.postman_collection.json')
-    policy = os.path.expanduser(f'{base_dir}/{d}/{f}')
-
-    (d, f) = ('DDMS Wellbore', 'Wellbore_DDMS_v3.0.postman_collection.json')
-    wellbore_ddms = os.path.expanduser(f'{base_dir}/{d}/{f}')
-
-    (d, f) = ('Core Services', 'AWS_OSDUR3M24_CoreServices_Collection.postman_collection.json')
-    core_services = os.path.expanduser(f'{base_dir}/{d}/{f}')
-
-    (d, f) = ('Schema Upgrade', 'Schema_Upgrade_with_JOLT.postman_collection.json')
-    schema_upgrade = os.path.expanduser(f'{base_dir}/{d}/{f}')
-
-    (d, f) = ('DDMS Reservoir', 'AWS_OSDUR3M23_ReservoirDDMS_Collection.postman_collection.json')
-    reservoir_ddms = os.path.expanduser(f'{base_dir}/{d}/{f}')
-
-    (d, f) = ('DDMS Seismic', '')
-# AWS_OSDUR3M24_SegyToOpenVDS_Conversion_using_Seisstore_v1.1.postman_collection.json
-# AWS_OSDUR3M24_Seismic_v4_Automated.postman_collection.json
-# AWS_OSDU_R3M24_OZGY_SDUtilUpload_API_Collections.postman_collection.json
-# ST0202R08_PS_PSDM_RAW_PP_TIME.MIG_RAW.POST_STACK.3D.JS-017534.segy
-
-
-
-def test_pmx():
-  try:
-    for fpath in [
-            path.policy,
-            path.wellbore_ddms,
-            path.core_services,
-      ]:
-        jdoc = parsed_file_or_url(fpath)
-        item_dict = pm_item_dict(jdoc)
-    #    assert len(item_dict) == 42
-        print('========================================================')
-
-        # NOTE This is snappy.  Transforms PM doc into a dict where the keys are
-        # terminal `item`s and the values are the list of `request`s that fall under
-        # that `item`.
-        # Now it is easy to iterate.
-        for ipath in item_dict:
-            print(ipath)
-            for rpath in item_dict[ipath]:
-                je = ext.parse(rpath)
-                [rm] = je.find(jdoc)
-                rfp = str(rm.full_path)
-                print('  ', rpath, rm.value['name'])
-  finally:
-    globals().update(locals())
-
-
-def sort_thing(jpath):
-    """
-    # TODO: this would be a good homework assignment.
-    # With follow-up forbidding use of `eval`.
-    jpath = 'item.[1].item.[5].item.[0].item.[1].item.[1].item'
-    """
-    inner = jpath.replace('item', '').replace('.', '').replace(']', ', ').replace('[', '')
-    return eval('(' + inner + ')')
-
-
-def do_item(thing, indent=0):
-  try:
-    is_item_or_request_but_not_both(thing)
-    if not 'item' in thing:
-        return do_request(thing, indent)
-    name = thing['name'] if 'name' in thing else 'base'
-    global items_seen
-    items_seen.append(name)
-    assert not is_request(thing)
-    assert has_items(thing)
-    items = thing['item']
-    assert type(items) is list
-    print('i', ' '*indent, name, len(items))
-    for ithing in items:
-        assert type(ithing) is dict
-        if 'item' in ithing:
-            do_item(ithing, indent+4)
-        else:   # it is a request
-            print(' '*(indent+4), ithing['name'])
-            do_request(ithing, indent+4)
-  finally:
-    globals().update(locals())
-
- 
-names = ['item', 'request']
-
-
-def fun(thing):
-    globals().update(locals())
-    try:
-        ir = is_request(thing)
-    except:
-        ir = 'no'
-    print(ir, type(thing))
-
-
-def test_pm():
-  try:
-    pdoc = pm_file()
-    recur(pdoc, fun)
-  finally:
-    globals().update(locals())
 
 

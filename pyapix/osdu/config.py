@@ -1,3 +1,5 @@
+import os
+
 class base_path:
     dir = '~/osdu/pre-shipping/R3-M24/AWS-M24'
 
