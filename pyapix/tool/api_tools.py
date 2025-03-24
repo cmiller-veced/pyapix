@@ -39,10 +39,12 @@ def endpoints_and_verbs(jdoc):
 def parameters_to_schema(ev_info):
     if 'parameters' in ev_info:
         parameters = ev_info['parameters']
-    pr = extract_from_dict_list(parameters or {}, 'required')
+    else:
+        parameters = {}
+    pr = extract_from_dict_list(parameters, 'required')
     return {
         'required': [key for key in pr if pr[key]],
-        'properties': extract_from_dict_list(parameters or {}, 'schema'), 
+        'properties': extract_from_dict_list(parameters, 'schema'), 
         'additionalProperties': False, 
         'type': 'object',
     }
@@ -50,7 +52,9 @@ def parameters_to_schema(ev_info):
 
 def dynamic_validator(config):
     local_validate = config.validate
-    jdoc = jsonref.loads(json.dumps(parsed_file_or_url(config.swagger_path)))
+#    jdoc = jsonref.loads(json.dumps(parsed_file_or_url(config.swagger_path)))
+    jd = json.dumps(parsed_file_or_url(config.swagger_path), default=str)
+    jdoc = jsonref.loads(jd)
     paths = config.alt_swagger(jdoc)['paths']
 
     def validator(endpoint, verb='get'):
@@ -78,7 +82,9 @@ def dynamic_call(config):
 
 
 def prep_func(config):
-    jdoc = jsonref.loads(json.dumps(parsed_file_or_url(config.swagger_path)))
+#    jdoc = jsonref.loads(json.dumps(parsed_file_or_url(config.swagger_path)))
+    jd = json.dumps(parsed_file_or_url(config.swagger_path), default=str)
+    jdoc = jsonref.loads(jd)
     paths = config.alt_swagger(jdoc)['paths']
     head_func = config.head_func
 
@@ -146,7 +152,7 @@ class Service:
     def __init__(self, name, call, _validator, ends):
         self.name = name
         self.call = call
-        self._validator = _validator
+        self.validator = _validator
         self.ends = ends
 
     def __repr__(self):

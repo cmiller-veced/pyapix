@@ -216,11 +216,11 @@ report_mode = True
 debug_mode = report_mode and False
 
 
-def fetch_client(url):
-  try:
-    1/0
-  finally:
-    globals().update(locals())
+# def fetch_client(url):
+#   try:
+#     1/0
+#   finally:
+#     globals().update(locals())
 
 def find_endpoint(url):
   try:
@@ -228,21 +228,36 @@ def find_endpoint(url):
   finally:
     globals().update(locals())
 
-def fetch_args(url, request):
+
+def fetch_args(url_raw, request):
   try:
-    1/0
+    if 'body' in request:
+        bm = request['body']['mode']
+        bd = decode_body(request['body'])
+    else:
+        bm = 'NO body'
+        bd = None
+
+    params = {}
+    (url, qparams) = decode_url(url_raw)
+    if qparams: params['query'] = qparams
+
+    if (bd and bd != {''}):
+        params['body'] = bd 
+ 
+    return (url, params)
   finally:
     globals().update(locals())
 
 
 alf = set()
 fu = []
-def find_service(url):
+def find_service(url, verb):
   try:
     for sname in epdict:
-        for ep in epdict[sname]:
-            if url.endswith(ep):
-                return (sname, ep)
+        for (ep, v) in epdict[sname]:
+            if url.endswith(ep) and v==verb:
+                return (sname.lower(), ep)
     # osdu-specific
     parts = url.split('/api/')    # OSDU specific
     last = parts[-1]
@@ -259,13 +274,39 @@ def find_service(url):
 # {'', 'auth', 'pws', 'entitlements', 'notification', 'token', 'unit', 'register', 'partition', 'signedurl}}', 'wellbore', 'https:', 'schema-service', 'dataset', 'seismic-store', 'legal', 'search', 'storage', 'policy', 'crs'}
 # TODO: expand url before finding service.                 NO
 # OR may need to search all services for the endpoint.     DONE
- 
-from pyapix.osdu.client import (unit, legal, entitlements, crs_catalog,
-    crs_conversion, 
+
+
+def test_find_service():
+  try:
+    uv = ('/api/storage/v2/records/{{wipRecordId}}', 'delete')
+    uv = ('/api/storage/v2/records/{{recordIdsSC}}', 'delete')
+    uv = ('/api/storage/v2/records/{{recordIds}}', 'delete')
+    fs = find_service(*uv)
+    # TODO: fix
+  finally:
+    globals().update(locals())
+
+
+from pyapix.osdu.client.bunch import (search, notification, register, 
+    storage,
+    schema,
+    dataset,
+    schema_upgrade,
+    secret_v1,
+    secret,
+    unit, legal, entitlements, crs_catalog, crs_conversion,
 )
-clients = (unit, legal, entitlements, crs_catalog, crs_conversion, )
-epdict = {c.service.name: set(ep for (ep, v) in c.service.ends) for c in clients}
-odict = {c.service.name.lower(): c.service for c in clients}
+
+clients = (unit, legal, entitlements, crs_catalog, crs_conversion, 
+    search, notification, register, schema, schema_upgrade, secret_v1, secret,
+    dataset,
+    storage,
+   )
+
+epdict = {s.name: set((ep, v) for (ep, v) in s.ends) for s in clients}
+odict = {s.name.lower():s for s in clients}
+#odict = {s.name:s for s in clients}
+
 cdict = defaultdict(lambda:'?')
 cdict.update(odict)
 
@@ -273,41 +314,44 @@ cdict.update(odict)
 def do_request(thing, indent):
   try:
     # TODO: validation:  
-    #     identify service, endpoint, verb   WIP
-    #     fetch data from `thing`            WIP
-    #     create/fetch api client            WIP
-    #     fetch validator              
-    #     validate data
+    #     identify service, endpoint, verb   OK
+    #     fetch data from `thing`            OK
+    #     create/fetch api client            OK
+    #     fetch validator                    OK
+    #     validate data                      OK
+    #  OK for some service/endpoint/verb combinations.
+    #  Many gaps.
     request = thing['request']
     url_raw = request['url']['raw']
+    (url, params) = fetch_args(url_raw, request)
 
-    (url, params) = decode_url(url_raw)
-    (sname, ep) = find_service(url)      # (service_name, endpoint)
-    service = cdict[sname]
     verb = request['method'].lower()
+    (sname, ep) = find_service(url, verb)      # (service_name, endpoint)
+    service = cdict[sname]
+    if (type(service) is not str) and (ep != '?'):
+        vd = service.validator(ep, verb)
+#        if not vd.is_valid(params): vd.validate(params)
+        vp = 'OK' if vd.is_valid(params) else 'NO'
+    else:
+        vp = 'unknown'
 
     dh = do_headers(request['header'])
-
-    if 'body' in request:
-        bm = request['body']['mode']
-        bd = decode_body(request['body'])
-    else:
-        bm = bd = 'NO body'
 
     if 'auth' in request:
         ra = request['auth']
 
     if report_mode:
-        if params:
-            assert type(params) is dict
-        if not fs: fu.append(url_raw)
-        alf.add(fs)
+        if qparams:
+            assert type(qparams) is dict
+        alf.add(sname)
         assert type(request) is dict
         for word in ['method', 'header', 'url']:
             assert word in request
         other_words = ['auth', 'body', 'description']  # may be in request
         print(' '*(indent+2), 'url_raw', url_raw)
-        print(' '*(indent+2), fs)
+        print(' '*(indent+2), sname, ep, verb)
+        print(' '*(indent+2), params)
+        print(' '*(indent+2), 'valid params?', vp)
 
     if debug_mode:
         print(' '*(indent+2), dh)
@@ -317,6 +361,8 @@ def do_request(thing, indent):
 
   finally:
     globals().update(locals())
+
+#from pyapix.osdu.client import search
 
 
 # Test

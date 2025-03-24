@@ -34,6 +34,7 @@ service_parts = ['api', 'crs', 'catalog', 'conversion', 'search', 'storage',
 # store the parameters in yaml? (or PM?)
 
 
+# TODO: rm
 def pm_files():
     preship_dir = '~/osdu/pre-shipping/R3-M24/AWS-M24'
     paths = []
