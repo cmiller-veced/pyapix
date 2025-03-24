@@ -14,9 +14,6 @@ from jsonpath_ng import ext
 from pyapix.tool.exploratory import pop_inputs, pop_key
 
 
-
-
-
 # TODO: if any of the url/path/query parsing stuff is needed, it is this.
 def fix_colon_prefix(path):
   try:
@@ -79,7 +76,7 @@ def decode_body(body):
     return json.loads(br)
 
 
-# TODO: is this needed?
+# TODO: is this needed?  Yes, it gets called, anyway.
 def decode_url(url):
     """For working with Postman.
     But should be much more general.
@@ -94,7 +91,6 @@ def decode_url(url):
     query_params = dict(x.split('=') for x in parts)
     front = fix_colon_prefix(front)
     return (front, query_params)
-
 
 
 # solid
@@ -216,19 +212,6 @@ report_mode = True
 debug_mode = report_mode and False
 
 
-# def fetch_client(url):
-#   try:
-#     1/0
-#   finally:
-#     globals().update(locals())
-
-def find_endpoint(url):
-  try:
-    1/0
-  finally:
-    globals().update(locals())
-
-
 def fetch_args(url_raw, request):
   try:
     if 'body' in request:
@@ -250,8 +233,6 @@ def fetch_args(url_raw, request):
     globals().update(locals())
 
 
-alf = set()
-fu = []
 def find_service(url, verb):
   try:
     for sname in epdict:
@@ -264,16 +245,8 @@ def find_service(url, verb):
     t = last.split('/')[0]
     s = t.replace('{', '').split('_')[0].lower()
     return (s, '?')
-    return t
-    return parts
   finally:
     globals().update(locals())
-# >>> fu
-# ['']
-# >>> alf
-# {'', 'auth', 'pws', 'entitlements', 'notification', 'token', 'unit', 'register', 'partition', 'signedurl}}', 'wellbore', 'https:', 'schema-service', 'dataset', 'seismic-store', 'legal', 'search', 'storage', 'policy', 'crs'}
-# TODO: expand url before finding service.                 NO
-# OR may need to search all services for the endpoint.     DONE
 
 
 def test_find_service():
@@ -283,6 +256,43 @@ def test_find_service():
     uv = ('/api/storage/v2/records/{{recordIds}}', 'delete')
     fs = find_service(*uv)
     # TODO: fix
+    # May have to look at verb and guess about endpoint.
+    # Although, in this case, guessing is not required.  Just more complex logic
+    # for the case of {{theseThings}}.
+    # Not too bad really.
+    """
+    >>> storage.ends [
+    ('/records', 'put'), 
+    ('/records', 'patch'), 
+    ('/records/copy', 'put'),
+    ('/records/{id}:delete', 'post'), 
+    ('/records/delete', 'post'),
+    ('/records/{id}', 'get'),
+    ('/records/{id}', 'delete'), 
+    ('/records/{id}/{version}', 'get'),
+    ('/records/versions/{id}', 'get'), 
+    ('/records/{id}/versions', 'delete'), 
+
+    ('/query/records', 'get'), 
+    ('/query/records', 'post'),
+    ('/query/records:batch', 'post'), 
+
+    ('/liveness_check', 'get'), 
+    ('/info', 'get'),
+
+    ('/replay/status/{id}', 'get'),
+    ('/replay/status/{id}', 'security'), 
+    ('/replay', 'post'), 
+
+    ('/whoami', 'get'),
+    ('/whoami', 'put'), 
+    ('/whoami', 'post'), 
+    ('/whoami', 'delete'), 
+    ('/whoami', 'options'),
+    ('/whoami', 'head'), 
+    ('/whoami', 'patch')]
+    """
+
   finally:
     globals().update(locals())
 
@@ -302,11 +312,9 @@ clients = (unit, legal, entitlements, crs_catalog, crs_conversion,
     dataset,
     storage,
    )
-
+# below depends on `clients`.
 epdict = {s.name: set((ep, v) for (ep, v) in s.ends) for s in clients}
 odict = {s.name.lower():s for s in clients}
-#odict = {s.name:s for s in clients}
-
 cdict = defaultdict(lambda:'?')
 cdict.update(odict)
 
@@ -321,8 +329,10 @@ def do_request(thing, indent):
     #     validate data                      OK
     #  OK for some service/endpoint/verb combinations.
     #  Many gaps.
+
     request = thing['request']
     url_raw = request['url']['raw']
+#    (url, _) = decode_url(url_raw)
     (url, params) = fetch_args(url_raw, request)
 
     verb = request['method'].lower()
@@ -341,9 +351,7 @@ def do_request(thing, indent):
         ra = request['auth']
 
     if report_mode:
-        if qparams:
-            assert type(qparams) is dict
-        alf.add(sname)
+#        if qparams: assert type(qparams) is dict
         assert type(request) is dict
         for word in ['method', 'header', 'url']:
             assert word in request
