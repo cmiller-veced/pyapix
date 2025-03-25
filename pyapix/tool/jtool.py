@@ -148,9 +148,9 @@ def reference_value(jdoc, raw_ref):
 
 def xinline_ref(rp, jdoc):
     """
-    >>> rp = ['definitions', 'VersionInfo', 'properties', 'connectedOuterServices', 'items', '$ref', '#/definitions/ConnectedOuterService']
     Update jdoc.
     Not functional but copying is expensive.
+    >>> rp = ['definitions', 'VersionInfo', 'properties', 'connectedOuterServices', 'items', '$ref', '#/definitions/ConnectedOuterService']
     """
     raw_ref = rp[-1]
     rv = reference_value(jdoc, raw_ref)
