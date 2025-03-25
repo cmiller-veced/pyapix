@@ -3,6 +3,7 @@ Working with Postman files.
 The focus is on OSDU preshipping.
 """
 
+import re
 import os
 import json
 from functools import lru_cache
@@ -235,10 +236,28 @@ def fetch_args(url_raw, request):
 
 def find_service(url, verb):
   try:
+    # base case
     for sname in epdict:
         for (ep, v) in epdict[sname]:
             if url.endswith(ep) and v==verb:
-                return (sname.lower(), ep)
+                return (sname, ep)
+    # url contains {{thisSortOfThing99}}
+    if '{{' in url:
+        # rm content inside {{foobar}}
+        assert '}}' in url
+        p = re.compile('{{[a-zA-Z0-9]*}}')
+        for m in p.findall(url):
+            url = url.replace(m, '{}')
+        # repeat original search but match on verb first, then ep with {rm}
+        for sname in epdict:
+            for (ep, v) in epdict[sname]:
+                if v==verb:
+                    p = re.compile('{[a-zA-Z0-9]*}')
+                    for m in p.findall(ep):
+                        epx = ep.replace(m, '{}')
+                        if url.endswith(epx) and v==verb:
+                            return (sname, ep)
+    # WTH?!
     # osdu-specific
     parts = url.split('/api/')    # OSDU specific
     last = parts[-1]
@@ -251,15 +270,14 @@ def find_service(url, verb):
 
 def test_find_service():
   try:
-    uv = ('/api/storage/v2/records/{{wipRecordId}}', 'delete')
-    uv = ('/api/storage/v2/records/{{recordIdsSC}}', 'delete')
-    uv = ('/api/storage/v2/records/{{recordIds}}', 'delete')
-    fs = find_service(*uv)
-    # TODO: fix
-    # May have to look at verb and guess about endpoint.
-    # Although, in this case, guessing is not required.  Just more complex logic
-    # for the case of {{theseThings}}.
-    # Not too bad really.
+    uvs = [
+        ('/api/storage/v2/records/{{wipRecordId}}', 'delete'),
+        ('/api/storage/v2/records/{{recordIdsSC}}', 'delete'),
+        ('/api/storage/v2/records/{{recordIds}}', 'delete'),
+    ]
+    for uv in uvs:
+        fs = find_service(*uv)
+        assert fs == ('storage', '/records/{id}')
     """
     >>> storage.ends [
     ('/records', 'put'), 
@@ -313,7 +331,7 @@ clients = (unit, legal, entitlements, crs_catalog, crs_conversion,
     storage,
    )
 # below depends on `clients`.
-epdict = {s.name: set((ep, v) for (ep, v) in s.ends) for s in clients}
+epdict = {s.name.lower(): set((ep, v) for (ep, v) in s.ends) for s in clients}
 odict = {s.name.lower():s for s in clients}
 cdict = defaultdict(lambda:'?')
 cdict.update(odict)
