@@ -52,8 +52,7 @@ def _(arg: dict, fun=identity_func):
 
 
 def find_all_refs(jdoc):
-    aps = leaf_paths(jdoc)
-    return [lst for lst in aps if lst[-2] == '$ref']
+    return [lst for lst in leaf_paths(jdoc) if lst[-2] == '$ref']
             
 
 # TODO: needs testing.
@@ -68,14 +67,14 @@ def replace_all_refs(jdoc):
     # NOTE: not functional
 
 
-def has_ref(dct):
-    for key in dct:
-        dkv = dct[key]
-        if not type(dkv) is dict:
-            continue
-        if list(dkv) == ['$ref']:
-            return key
-    return None
+# def has_ref(dct):
+#     for key in dct:
+#         dkv = dct[key]
+#         if not type(dkv) is dict:
+#             continue
+#         if list(dkv) == ['$ref']:
+#             return key
+#     return None
 
 
 # This belongs here.   It's been used to good effect on both PM and swagger.
@@ -378,23 +377,18 @@ def test_namespace():    # dict => namespace
   finally:
     globals().update(locals())
 
-
-# # swagger paths.  As contrasted with leaf paths.
-# def all_paths(jdoc):
-#     return list(jdoc['paths'])
-
-# xinline_ref(rp, jdoc)
-# rp = ['definitions', 'VersionInfo', 'properties', 'connectedOuterServices', 'items', '$ref', '#/definitions/ConnectedOuterService']
   
 def test_one_ref():
     jdoc = parsed_file_or_url(unit.config.swagger_path)
     ep = '/v3/unitsystem/list'
     epi = jdoc['paths'][ep]['get']['responses']
     ep2 = jdoc['paths'][ep]['get']['responses']['200']
-    o = copy.deepcopy(ep2)
-    s0 = copy.deepcopy(jdoc['paths'][ep]['get']['responses']['200'])    #['schema']
 
-    hr = has_ref(ep2)
+
+#     o = copy.deepcopy(ep2)
+#     s0 = copy.deepcopy(jdoc['paths'][ep]['get']['responses']['200'])    #['schema']
+
+#    hr = has_ref(ep2)
 #     xinline_ref(ep2, hr, jdoc)
 #     ep3 = ep2['schema']['properties']['unitSystemInfoList']
 #     hr = has_ref(ep3)
