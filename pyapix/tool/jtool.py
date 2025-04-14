@@ -26,6 +26,12 @@ identity_func  = lambda x:x
 
 
 def deep_key(obj, keys):
+    """
+    >>> [d0, _] = tdocs()
+    >>> assert deep_key(d0, ['a', 'aa']) == 9
+    >>> assert deep_key(d0, ['b', 'bb']) == 7
+    >>> assert d0 == tdocs()[0]   # input not mutated
+    """
     for key in keys:
         obj = obj[key]
     return obj
@@ -45,17 +51,11 @@ def _(arg: dict, fun=identity_func):
     return {key:recur(fun(arg[key]), fun) for key in arg}
 
 
-# swagger specific   NO   NO   NO   NO   NO   NO   NO   NO   NO 
-# references are NOT at all swagger-specific.   DUH
-# swagger specific
 def find_all_refs(jdoc):
     aps = leaf_paths(jdoc)
     return [lst for lst in aps if lst[-2] == '$ref']
             
 
-# swagger specific   NO   NO   NO   NO   NO   NO   NO   NO   NO 
-# references are NOT at all swagger-specific.   DUH
-# swagger specific
 # TODO: needs testing.
 def replace_all_refs(jdoc):
     """
@@ -68,9 +68,6 @@ def replace_all_refs(jdoc):
     # NOTE: not functional
 
 
-# swagger specific   NO   NO   NO   NO   NO   NO   NO   NO   NO 
-# references are NOT at all swagger-specific.   DUH
-# swagger specific
 def has_ref(dct):
     for key in dct:
         dkv = dct[key]
@@ -133,8 +130,6 @@ def to_jsonpath(lst):
     return '.'.join(path_prep(x) for x in lst)
 
 
-# swagger specific   NO   NO   NO   NO   NO   NO   NO   NO   NO 
-# references are NOT at all swagger-specific.   DUH
 def reference_value(jdoc, raw_ref):
     ref_path = raw_ref.split('/')[1:]
     return deep_key(jdoc, ref_path)
@@ -146,6 +141,7 @@ def reference_value(jdoc, raw_ref):
 #     return 'ok'
 
 
+# TODO: rename
 def xinline_ref(rp, jdoc):
     """
     Update jdoc.
@@ -168,7 +164,7 @@ def xinline_ref(rp, jdoc):
 # ########################################################################## #
 
 
-def test_docs():
+def tdocs():
     jd1 = dict(
         a=dict(
             aa=9,
@@ -244,7 +240,7 @@ def delete_all_refs(jdoc):
 
 def test_path_extraction():
   try:
-    (jd1, jd2) = test_docs()
+    (jd1, jd2) = tdocs()
     lp2 = leaf_paths(jd2)
     assert lp2 == [['a', 'bb', 0, 'aaa', 3], ['b', 'bb', 3]]
     vs2 = [p[-1] for p in lp2]
@@ -333,10 +329,10 @@ def test_refs():
     globals().update(locals())
 
 
-def test_all():
-    test_refs()
-    test_path_extraction()
-    test_namespace()
+# def test_all():
+#     test_refs()
+#     test_path_extraction()
+#     test_namespace()
 
 
 # ###########################
